@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="selected_theme_color">@color/colorPrimary</color>
+    <color name="unselected_theme_color">@android:color/white</color>
+
+    <color name="colorPrimary">#FF2196F3</color>
+    <color name="colorPrimaryDark">#FF1976D2</color>
+    <color name="colorPrimaryLight">#FFBBDEFB</color>
+    <color name="colorAccent">#FFFFC107</color>
+
+</resources>
