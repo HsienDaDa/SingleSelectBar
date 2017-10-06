@@ -34,6 +34,14 @@ public class SelectBoardResHelper {
         endCornerRadii = new float[]{0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
     }
     
+    public void setColorSelected(@ColorInt int colorSelected) {
+        this.colorSelected = colorSelected;
+    }
+    
+    public void setColorUnselected(@ColorInt int colorUnselected) {
+        this.colorUnselected = colorUnselected;
+    }
+    
     public Drawable getBoardBackgroundDrawable() {
         return getCornerStateDrawable(backgroundCornerRadii);
     }

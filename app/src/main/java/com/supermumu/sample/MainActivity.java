@@ -1,10 +1,9 @@
 package com.supermumu.sample;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.supermumu.ui.widget.SingleSelectBoard;
 
@@ -26,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     
         final TextView textView = findViewById(R.id.text);
         SingleSelectBoard board = findViewById(R.id.single_select_board);
-        board.setClickListener(new SingleSelectBoard.IButtonClickListener() {
+        board.setOnButtonSelectedListener(new SingleSelectBoard.OnButtonSelectedListener() {
     
             @Override
             public void onClickListener(int position, View view) {

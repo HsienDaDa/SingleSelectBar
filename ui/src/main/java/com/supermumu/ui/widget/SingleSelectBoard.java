@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -33,11 +34,11 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     private final int MIN_COUNT = 2;
     private final int MAX_COUNT = 5;
     
-    public interface IButtonClickListener {
+    public interface OnButtonSelectedListener {
         void onClickListener(int position, View view);
     }
     
-    private IButtonClickListener buttonClickListener;
+    private OnButtonSelectedListener buttonSelectedListener;
     
     private SelectBoardResHelper selectBoardResHelper;
     private int visibleButtonCount;
@@ -245,12 +246,20 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
                 childView.setSelected(true);
                 invalidate();
                 
-                if (null != buttonClickListener) {
-                    buttonClickListener.onClickListener(currentPos, view);
+                if (null != buttonSelectedListener) {
+                    buttonSelectedListener.onClickListener(currentPos, view);
                 }
                 break;
             }
         }
+    }
+    
+    public void setSelectedColor(@ColorInt int color) {
+        selectBoardResHelper.setColorSelected(color);
+    }
+    
+    public void setUnselectedColor(@ColorInt int color) {
+        selectBoardResHelper.setColorUnselected(color);
     }
     
     public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
@@ -266,7 +275,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         }
     }
     
-    public void setClickListener(IButtonClickListener listener) {
-        buttonClickListener = listener;
+    public void setOnButtonSelectedListener(OnButtonSelectedListener listener) {
+        buttonSelectedListener = listener;
     }
 }
