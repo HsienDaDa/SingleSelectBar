@@ -48,6 +48,10 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     private RectF selectedRectF = new RectF();
     private Path selectedPath = new Path();
     
+    private float transitionOffset;
+    private int currentPos = 0;
+    private int previousPos = 0;
+    
     public SingleSelectBoard(Context context) {
         super(context);
         init(context, null);
@@ -125,29 +129,59 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     
+        drawDividers(canvas);
+        drawSelectedButton(canvas);
+    }
+    
+    private void drawDividers(Canvas canvas) {
         dividerRect.top = 0;
         dividerRect.bottom = getMeasuredHeight();
         dividerRect.left = - (dividerWidth / 2);
         dividerRect.right = 0;
-        
-        for (int i=0; i<visibleButtonCount; i++) {
+    
+        int dividerCount = (visibleButtonCount - 1);
+        for (int i=0; i<dividerCount; i++) {
             View childView = getChildAt(i);
-            if (i < visibleButtonCount - 1) {
-                dividerRect.left += childView.getMeasuredWidth();
-                dividerRect.right = dividerRect.left + dividerWidth;
-                canvas.drawRect(dividerRect, selectedColorPaint);
-            }
-            
-            if (childView.isSelected()) {
-                drawSelectedRegion(canvas, childView, i);
+            dividerRect.left += childView.getMeasuredWidth();
+            dividerRect.right = dividerRect.left + dividerWidth;
+            canvas.drawRect(dividerRect, selectedColorPaint);
+        }
+    }
+    
+    private void drawSelectedButton(Canvas canvas) {
+        selectedPath.reset();
+    
+        View currentView = getChildAt(currentPos);
+        final View previousView = getChildAt(previousPos);
+        if (previousPos == currentPos) {
+            transitionOffset = 0F;
+            drawSelectedButton(canvas, currentView, currentPos);
+        } else {
+            final int transitionCount = (Math.abs(currentPos - previousPos) * 3);
+            float bothViewsDistance = (currentView.getX() - previousView.getX());
+            float offset = (bothViewsDistance / transitionCount);
+            transitionOffset += offset;
+            if (isEndTransition(transitionOffset - bothViewsDistance)) {
+                transitionOffset = 0F;
+                drawSelectedButton(canvas, currentView, currentPos);
+                previousPos = currentPos;
+            } else {
+                drawSelectedButton(canvas, previousView, previousPos);
+                postInvalidateDelayed(150L / transitionCount);
             }
         }
     }
     
-    private void drawSelectedRegion(Canvas canvas, View view, int index) {
-        selectedPath.reset();
+    private boolean isEndTransition(float nextX) {
+        if (previousPos < currentPos) {
+            return (nextX >= 0);
+        } else {
+            return (nextX <= 0);
+        }
+    }
     
-        final float left = view.getX();
+    private void drawSelectedButton(Canvas canvas, View view, int index) {
+        final float left = view.getX() + transitionOffset;
         final float top = view.getY();
         final float right = left + view.getMeasuredWidth();
         final float bottom = view.getMeasuredHeight();
@@ -165,7 +199,11 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         canvas.drawPath(selectedPath, selectedColorPaint);
     }
     
-    public void setDisplayText(@NonNull ArrayList<CharSequence> list) {
+    public void setItems(@NonNull ArrayList<CharSequence> list) {
+        setItems(list, currentPos);
+    }
+    
+    public void setItems(@NonNull ArrayList<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
         for (int i=0; i<MAX_COUNT; i++) {
@@ -178,10 +216,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
             }
         }
     
-        View view = getChildAt(0);
-        if (view.getVisibility() == View.VISIBLE) {
-            view.callOnClick();
-        }
+        setSelector(selectorPos);
     }
     
     @IntRange(from = MIN_COUNT, to = MAX_COUNT)
@@ -194,38 +229,40 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     @Override
     public void onClick(View view) {
+        View previousView = getChildAt(currentPos);
+        if (previousView == view && view.isSelected()) {
+            return;
+        }
+    
+        previousPos = currentPos;
+        previousView.setSelected(false);
+    
         int rightIndex = visibleButtonCount - 1;
         for (int index = rightIndex; index >= 0; index--) {
             View childView = getChildAt(index);
-            if (childView.getVisibility() != View.VISIBLE) {
-                continue;
-            }
-            
-            boolean isSelectedView = (childView == view);
-            if (isSelectedView) {
-                if (childView.isSelected()) {
-                    continue;
+            if (childView == view) {
+                currentPos = index;
+                childView.setSelected(true);
+                invalidate();
+                
+                if (null != buttonClickListener) {
+                    buttonClickListener.onClickListener(currentPos, view);
                 }
-            } else {
-                if (!childView.isSelected()) {
-                    continue;
-                }
+                break;
             }
-            
-            childView.setSelected(isSelectedView);
-            invalidate();
+        }
+    }
+    
+    public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
+        if (position > visibleButtonCount) {
+            position = (visibleButtonCount - 1);
         }
         
-        if (null != buttonClickListener) {
-            int position = 0;
-            for (int i=0; i<getChildCount(); i++) {
-                if (view == getChildAt(i)) {
-                    position = i;
-                    break;
-                }
+        if (position >= 0 && currentPos != position) {
+            View view = getChildAt(position);
+            if (view.getVisibility() == View.VISIBLE) {
+                view.callOnClick();
             }
-            
-            buttonClickListener.onClickListener(position, view);
         }
     }
     
