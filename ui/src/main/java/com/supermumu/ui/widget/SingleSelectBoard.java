@@ -3,6 +3,12 @@ package com.supermumu.ui.widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -35,6 +41,12 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     private SelectBoardResHelper selectBoardResHelper;
     private int visibleButtonCount;
+    private int dividerWidth;
+    
+    private Paint selectedColorPaint = new Paint();
+    private Rect dividerRect = new Rect();
+    private RectF selectedRectF = new RectF();
+    private Path selectedPath = new Path();
     
     public SingleSelectBoard(Context context) {
         super(context);
@@ -52,7 +64,12 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     }
     
     private void init(Context context, AttributeSet attrs) {
+        setWillNotDraw(false);
+        
         initSelectBoardThemeAttributes(context, attrs);
+    
+        Drawable boardBackground = selectBoardResHelper.getBoardBackgroundDrawable();
+        setBackground(boardBackground);
         
         final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
         for (int i=0; i<MAX_COUNT; i++) {
@@ -74,6 +91,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         if (colorSelected == 0) {
             colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
         }
+        selectedColorPaint.setColor(colorSelected);
     
         int colorUnselected = a.getColor(R.styleable.SingleSelectBoard_colorUnselected, 0);
         if (colorUnselected == 0) {
@@ -84,6 +102,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
         int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_radius);
         int strokeWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_stroke_width);
+        dividerWidth = strokeWidth;
     
         selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, strokeWidth);
     }
@@ -102,19 +121,56 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         return view;
     }
     
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+    
+        dividerRect.top = 0;
+        dividerRect.bottom = getMeasuredHeight();
+        dividerRect.left = - (dividerWidth / 2);
+        dividerRect.right = 0;
+        
+        for (int i=0; i<visibleButtonCount; i++) {
+            View childView = getChildAt(i);
+            if (i < visibleButtonCount - 1) {
+                dividerRect.left += childView.getMeasuredWidth();
+                dividerRect.right = dividerRect.left + dividerWidth;
+                canvas.drawRect(dividerRect, selectedColorPaint);
+            }
+            
+            if (childView.isSelected()) {
+                drawSelectedRegion(canvas, childView, i);
+            }
+        }
+    }
+    
+    private void drawSelectedRegion(Canvas canvas, View view, int index) {
+        selectedPath.reset();
+    
+        final float left = view.getX();
+        final float top = view.getY();
+        final float right = left + view.getMeasuredWidth();
+        final float bottom = view.getMeasuredHeight();
+        selectedRectF.set(left, top, right, bottom);
+        if (index == 0) {
+            selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getStartCornerRadii(), Path.Direction.CCW);
+        } else if (index == visibleButtonCount - 1) {
+            selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getEndCornerRadii(), Path.Direction.CCW);
+        } else {
+            selectedPath.moveTo(left, top);
+            selectedPath.lineTo(right, top);
+            selectedPath.lineTo(right, bottom);
+            selectedPath.lineTo(left, bottom);
+        }
+        canvas.drawPath(selectedPath, selectedColorPaint);
+    }
+    
     public void setDisplayText(@NonNull ArrayList<CharSequence> list) {
         visibleButtonCount = checkButtonCount(list.size());
         
         for (int i=0; i<MAX_COUNT; i++) {
             View view = getChildAt(i);
             if (i < visibleButtonCount) {
-                if (i == 0) {
-                    view.setBackground(selectBoardResHelper.getStartDrawable());
-                } else if ((i + 1) == visibleButtonCount) {
-                    view.setBackground(selectBoardResHelper.getEndDrawable());
-                } else {
-                    view.setBackground(selectBoardResHelper.getCenterDrawable());
-                }
                 ((TextView)view).setText(list.get(i));
                 view.setVisibility(View.VISIBLE);
             } else {
@@ -157,14 +213,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
             }
             
             childView.setSelected(isSelectedView);
-            if (index == 0) {
-                childView.setBackground(selectBoardResHelper.getStartDrawable());
-            } else if (index == rightIndex) {
-                rightIndex = index;
-                childView.setBackground(selectBoardResHelper.getEndDrawable());
-            } else {
-                childView.setBackground(selectBoardResHelper.getCenterDrawable());
-            }
+            invalidate();
         }
         
         if (null != buttonClickListener) {
