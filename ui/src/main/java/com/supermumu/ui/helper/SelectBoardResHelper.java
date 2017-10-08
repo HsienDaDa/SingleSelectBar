@@ -1,6 +1,10 @@
 package com.supermumu.ui.helper;
 
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -12,6 +16,7 @@ import android.support.annotation.ColorInt;
 
 public class SelectBoardResHelper {
     
+    private Paint selectedColorPaint = new Paint();
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private float roundRadius;
@@ -23,8 +28,8 @@ public class SelectBoardResHelper {
     private float[] endCornerRadii;
     
     public SelectBoardResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
-        this.colorSelected = colorSelected;
-        this.colorUnselected = colorUnselected;
+        setColorSelected(colorSelected);
+        setColorUnselected(colorUnselected);
         this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
     
@@ -34,12 +39,23 @@ public class SelectBoardResHelper {
         endCornerRadii = new float[]{0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
     }
     
-    public void setColorSelected(@ColorInt int colorSelected) {
-        this.colorSelected = colorSelected;
+    public boolean setColorSelected(@ColorInt int colorSelected) {
+        boolean hasChanged = false;
+        if (this.colorSelected != colorSelected) {
+            this.colorSelected = colorSelected;
+            selectedColorPaint.setColor(colorSelected);
+            hasChanged = true;
+        }
+        return hasChanged;
     }
     
-    public void setColorUnselected(@ColorInt int colorUnselected) {
-        this.colorUnselected = colorUnselected;
+    public boolean setColorUnselected(@ColorInt int colorUnselected) {
+        boolean hasChanged = false;
+        if (this.colorUnselected != colorUnselected) {
+            this.colorUnselected = colorUnselected;
+            hasChanged = true;
+        }
+        return hasChanged;
     }
     
     public Drawable getBoardBackgroundDrawable() {
@@ -85,5 +101,13 @@ public class SelectBoardResHelper {
         states[0] = new int[] {android.R.attr.state_selected};
         states[1] = new int[] {};
         return new ColorStateList(states, colors);
+    }
+    
+    public void drawRect(Canvas canvas, Rect rect) {
+        canvas.drawRect(rect, selectedColorPaint);
+    }
+    
+    public void drawPath(Canvas canvas, Path path) {
+        canvas.drawPath(path, selectedColorPaint);
     }
 }

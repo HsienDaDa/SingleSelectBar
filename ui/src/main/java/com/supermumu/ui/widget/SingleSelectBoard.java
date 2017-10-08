@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -14,6 +13,7 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +44,6 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     private int visibleButtonCount;
     private int dividerWidth;
     
-    private Paint selectedColorPaint = new Paint();
     private Rect dividerRect = new Rect();
     private RectF selectedRectF = new RectF();
     private Path selectedPath = new Path();
@@ -73,8 +72,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         
         initSelectBoardThemeAttributes(context, attrs);
     
-        Drawable boardBackground = selectBoardResHelper.getBoardBackgroundDrawable();
-        setBackground(boardBackground);
+        invalidBackground();
         
         final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
         for (int i=0; i<MAX_COUNT; i++) {
@@ -96,7 +94,6 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         if (colorSelected == 0) {
             colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
         }
-        selectedColorPaint.setColor(colorSelected);
     
         int colorUnselected = a.getColor(R.styleable.SingleSelectBoard_colorUnselected, 0);
         if (colorUnselected == 0) {
@@ -145,7 +142,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
             View childView = getChildAt(i);
             dividerRect.left += childView.getMeasuredWidth();
             dividerRect.right = dividerRect.left + dividerWidth;
-            canvas.drawRect(dividerRect, selectedColorPaint);
+            selectBoardResHelper.drawRect(canvas, dividerRect);
         }
     }
     
@@ -168,7 +165,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
                 previousPos = currentPos;
             } else {
                 drawSelectedButton(canvas, previousView, previousPos);
-                postInvalidateDelayed(150L / transitionCount);
+                postInvalidateDelayed(120L / transitionCount);
             }
         }
     }
@@ -197,7 +194,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
             selectedPath.lineTo(right, bottom);
             selectedPath.lineTo(left, bottom);
         }
-        canvas.drawPath(selectedPath, selectedColorPaint);
+        selectBoardResHelper.drawPath(canvas, selectedPath);
     }
     
     public void setItems(@NonNull ArrayList<CharSequence> list) {
@@ -255,11 +252,19 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     }
     
     public void setSelectedColor(@ColorInt int color) {
-        selectBoardResHelper.setColorSelected(color);
+        if (selectBoardResHelper.setColorSelected(color)) {
+            invalidate();
+            invalidBackground();
+            invalidTextColor();
+        }
     }
     
     public void setUnselectedColor(@ColorInt int color) {
-        selectBoardResHelper.setColorUnselected(color);
+        if (selectBoardResHelper.setColorUnselected(color)) {
+            invalidate();
+            invalidBackground();
+            invalidTextColor();
+        }
     }
     
     public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
@@ -277,5 +282,21 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     public void setOnButtonSelectedListener(OnButtonSelectedListener listener) {
         buttonSelectedListener = listener;
+    }
+    
+    private void invalidBackground() {
+        Drawable boardBackground = selectBoardResHelper.getBoardBackgroundDrawable();
+        setBackground(boardBackground);
+    }
+    
+    private void invalidTextColor() {
+        ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
+        int childCount = getChildCount();
+        for (int i=0; i<childCount; i++) {
+            View childView = getChildAt(i);
+            if (null != childView && childView instanceof TextView) {
+                ((TextView)childView).setTextColor(colorStateList);
+            }
+        }
     }
 }
