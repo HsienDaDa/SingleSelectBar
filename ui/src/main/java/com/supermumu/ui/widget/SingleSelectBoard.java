@@ -13,7 +13,6 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ import android.widget.TextView;
 import com.supermumu.R;
 import com.supermumu.ui.helper.SelectBoardResHelper;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -31,14 +30,16 @@ import java.util.Locale;
  */
 
 public class SingleSelectBoard extends LinearLayout implements View.OnClickListener {
-    private final int MIN_COUNT = 2;
-    private final int MAX_COUNT = 5;
+    private static final long SCROLL_ANIMATION_DURATION_MS = 120L;
+    private static final int MIN_COUNT = 2;
+    private static final int MAX_COUNT = 5;
+    private TextView[] itemViews;
     
-    public interface OnButtonSelectedListener {
+    public interface OnItemSelectedListener {
         void onClickListener(int position, View view);
     }
     
-    private OnButtonSelectedListener buttonSelectedListener;
+    private OnItemSelectedListener buttonSelectedListener;
     
     private SelectBoardResHelper selectBoardResHelper;
     private int visibleButtonCount;
@@ -69,14 +70,31 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     private void init(Context context, AttributeSet attrs) {
         setWillNotDraw(false);
-        
+        setGravity(Gravity.CENTER_VERTICAL);
         initSelectBoardThemeAttributes(context, attrs);
-    
         invalidBackground();
-        
+    
+        itemViews = new TextView[MAX_COUNT];
+        buildItemView(context, attrs);
+        itemViews[currentPos].setSelected(true);
+    }
+    
+    private void buildItemView(Context context, AttributeSet attrs) {
         final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
+        ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
+        
         for (int i=0; i<MAX_COUNT; i++) {
-            TextView view = createTextView(context, margin1X, attrs);
+            LayoutParams lp = new LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1);
+            
+            TextView view = new TextView(context, attrs);
+            view.setLayoutParams(lp);
+            view.setPadding(0, margin1X, 0, margin1X);
+            view.setGravity(Gravity.CENTER);
+            view.setTextColor(colorStateList);
+            itemViews[i] = view;
             view.setOnClickListener(this);
             addView(view);
         }
@@ -109,20 +127,6 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, strokeWidth);
     }
     
-    private TextView createTextView(Context context, int padding, AttributeSet attrs) {
-        ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
-        LayoutParams lp = new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                1);
-        TextView view = new TextView(context, attrs);
-        view.setLayoutParams(lp);
-        view.setPadding(0, padding, 0, padding);
-        view.setGravity(Gravity.CENTER);
-        view.setTextColor(colorStateList);
-        return view;
-    }
-    
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -139,8 +143,8 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
         int dividerCount = (visibleButtonCount - 1);
         for (int i=0; i<dividerCount; i++) {
-            View childView = getChildAt(i);
-            dividerRect.left += childView.getMeasuredWidth();
+            View itemView = itemViews[i];
+            dividerRect.left += itemView.getMeasuredWidth();
             dividerRect.right = dividerRect.left + dividerWidth;
             selectBoardResHelper.drawRect(canvas, dividerRect);
         }
@@ -149,8 +153,8 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     private void drawSelectedButton(Canvas canvas) {
         selectedPath.reset();
     
-        View currentView = getChildAt(currentPos);
-        final View previousView = getChildAt(previousPos);
+        View currentView = itemViews[currentPos];
+        final View previousView = itemViews[previousPos];
         if (previousPos == currentPos) {
             transitionOffset = 0F;
             drawSelectedButton(canvas, currentView, currentPos);
@@ -165,7 +169,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
                 previousPos = currentPos;
             } else {
                 drawSelectedButton(canvas, previousView, previousPos);
-                postInvalidateDelayed(120L / transitionCount);
+                postInvalidateDelayed(SCROLL_ANIMATION_DURATION_MS / transitionCount);
             }
         }
     }
@@ -180,9 +184,9 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     private void drawSelectedButton(Canvas canvas, View view, int index) {
         final float left = view.getX() + transitionOffset;
-        final float top = view.getY();
+        final float top = 0;
         final float right = left + view.getMeasuredWidth();
-        final float bottom = view.getMeasuredHeight();
+        final float bottom = getMeasuredHeight();
         selectedRectF.set(left, top, right, bottom);
         if (index == 0) {
             selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getStartCornerRadii(), Path.Direction.CCW);
@@ -197,20 +201,24 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         selectBoardResHelper.drawPath(canvas, selectedPath);
     }
     
-    public void setItems(@NonNull ArrayList<CharSequence> list) {
-        setItems(list, currentPos);
+    /**
+     * Set a list of item
+     * @param list
+     */
+    public void setItems(@NonNull List<CharSequence> list) {
+        setItems(list, 0);
     }
     
-    public void setItems(@NonNull ArrayList<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
+    public void setItems(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
         for (int i=0; i<MAX_COUNT; i++) {
-            View view = getChildAt(i);
+            TextView itemView = itemViews[i];
             if (i < visibleButtonCount) {
-                ((TextView)view).setText(list.get(i));
-                view.setVisibility(View.VISIBLE);
+                itemView.setText(list.get(i));
+                itemView.setVisibility(View.VISIBLE);
             } else {
-                view.setVisibility(View.GONE);
+                itemView.setVisibility(View.GONE);
             }
         }
     
@@ -220,14 +228,14 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     @IntRange(from = MIN_COUNT, to = MAX_COUNT)
     private int checkButtonCount(int count) {
         if (MIN_COUNT > count || count > MAX_COUNT) {
-            throw new RuntimeException(String.format(Locale.getDefault(), "The attr of buttonCount must set %d to %d", MIN_COUNT, MAX_COUNT));
+            throw new RuntimeException(String.format(Locale.getDefault(), "The item count must be %d to %d", MIN_COUNT, MAX_COUNT));
         }
         return count;
     }
     
     @Override
     public void onClick(View view) {
-        View previousView = getChildAt(currentPos);
+        View previousView = itemViews[currentPos];
         if (previousView == view && view.isSelected()) {
             return;
         }
@@ -237,10 +245,10 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
         int rightIndex = visibleButtonCount - 1;
         for (int index = rightIndex; index >= 0; index--) {
-            View childView = getChildAt(index);
-            if (childView == view) {
+            View itemView = itemViews[index];
+            if (itemView == view) {
                 currentPos = index;
-                childView.setSelected(true);
+                itemView.setSelected(true);
                 invalidate();
                 
                 if (null != buttonSelectedListener) {
@@ -273,14 +281,14 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         }
         
         if (position >= 0 && currentPos != position) {
-            View view = getChildAt(position);
-            if (view.getVisibility() == View.VISIBLE) {
-                view.callOnClick();
+            View itemView = itemViews[position];
+            if (itemView.getVisibility() == View.VISIBLE) {
+                itemView.callOnClick();
             }
         }
     }
     
-    public void setOnButtonSelectedListener(OnButtonSelectedListener listener) {
+    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
         buttonSelectedListener = listener;
     }
     
@@ -291,12 +299,8 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     
     private void invalidTextColor() {
         ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
-        int childCount = getChildCount();
-        for (int i=0; i<childCount; i++) {
-            View childView = getChildAt(i);
-            if (null != childView && childView instanceof TextView) {
-                ((TextView)childView).setTextColor(colorStateList);
-            }
+        for (TextView itemView : itemViews) {
+            itemView.setTextColor(colorStateList);
         }
     }
 }

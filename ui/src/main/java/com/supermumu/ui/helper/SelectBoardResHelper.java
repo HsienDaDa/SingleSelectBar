@@ -27,6 +27,8 @@ public class SelectBoardResHelper {
     private float[] centerCornerRadii;
     private float[] endCornerRadii;
     
+    private ColorStateList textColor;
+    
     public SelectBoardResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
@@ -44,6 +46,7 @@ public class SelectBoardResHelper {
         if (this.colorSelected != colorSelected) {
             this.colorSelected = colorSelected;
             selectedColorPaint.setColor(colorSelected);
+            updateTextColor();
             hasChanged = true;
         }
         return hasChanged;
@@ -53,6 +56,7 @@ public class SelectBoardResHelper {
         boolean hasChanged = false;
         if (this.colorUnselected != colorUnselected) {
             this.colorUnselected = colorUnselected;
+            updateTextColor();
             hasChanged = true;
         }
         return hasChanged;
@@ -95,12 +99,16 @@ public class SelectBoardResHelper {
         return drawable;
     }
     
-    public ColorStateList getTextColorStateList() {
+    private void updateTextColor() {
         int[] colors = new int[] {colorUnselected, colorSelected};
         int[][] states = new int[2][];
         states[0] = new int[] {android.R.attr.state_selected};
         states[1] = new int[] {};
-        return new ColorStateList(states, colors);
+        textColor = new ColorStateList(states, colors);
+    }
+    
+    public ColorStateList getTextColorStateList() {
+        return textColor;
     }
     
     public void drawRect(Canvas canvas, Rect rect) {
