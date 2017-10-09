@@ -29,7 +29,7 @@ import java.util.Locale;
  * Created by hsienhsu on 2017/9/20.
  */
 
-public class SingleSelectBoard extends LinearLayout implements View.OnClickListener {
+public class SingleSelectBoard extends LinearLayout {
     private static final long SCROLL_ANIMATION_DURATION_MS = 120L;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
@@ -95,7 +95,7 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
             view.setGravity(Gravity.CENTER);
             view.setTextColor(colorStateList);
             itemViews[i] = view;
-            view.setOnClickListener(this);
+            view.setOnClickListener(clickListener);
             addView(view);
         }
     }
@@ -202,13 +202,24 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
     }
     
     /**
-     * Set a list of item
-     * @param list
+     * Set a new list of text to selected board. The texts display give title.
+     *
+     * @param list The list of text to display for all selectors.
+     *
+     * @throws IndexOutOfBoundsException &nbsp;
      */
     public void setItems(@NonNull List<CharSequence> list) {
         setItems(list, 0);
     }
     
+    /**
+     * Set a new list of text to selected board with targt position. The texts display give title.
+     *
+     * @param list The list of text to display for all selectors.
+     * @param selectorPos A default position to select after data change.
+     *
+     * @throws IndexOutOfBoundsException &nbsp;
+     */
     public void setItems(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
@@ -225,40 +236,65 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         setSelector(selectorPos);
     }
     
+    /**
+     * Get a maximum count for select board.
+     *
+     * @return The maximum count of selectors.
+     */
+    public int getMaxSelectorCount() {
+        return MAX_COUNT;
+    }
+    
+    /**
+     * Get a minimum count for select board.
+     *
+     * @return The minimum count of selectors.
+     */
+    public int getMinSelectorCount() {
+        return MIN_COUNT;
+    }
+    
     @IntRange(from = MIN_COUNT, to = MAX_COUNT)
     private int checkButtonCount(int count) {
         if (MIN_COUNT > count || count > MAX_COUNT) {
-            throw new RuntimeException(String.format(Locale.getDefault(), "The item count must be %d to %d", MIN_COUNT, MAX_COUNT));
+            throw new IndexOutOfBoundsException(String.format(Locale.getDefault(), "The item count must be %d to %d", MIN_COUNT, MAX_COUNT));
         }
         return count;
     }
     
-    @Override
-    public void onClick(View view) {
-        View previousView = itemViews[currentPos];
-        if (previousView == view && view.isSelected()) {
-            return;
-        }
+    private OnClickListener clickListener = new OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            View previousView = itemViews[currentPos];
+            if (previousView == view && view.isSelected()) {
+                return;
+            }
     
-        previousPos = currentPos;
-        previousView.setSelected(false);
+            previousPos = currentPos;
+            previousView.setSelected(false);
     
-        int rightIndex = visibleButtonCount - 1;
-        for (int index = rightIndex; index >= 0; index--) {
-            View itemView = itemViews[index];
-            if (itemView == view) {
-                currentPos = index;
-                itemView.setSelected(true);
-                invalidate();
-                
-                if (null != buttonSelectedListener) {
-                    buttonSelectedListener.onClickListener(currentPos, view);
+            int rightIndex = visibleButtonCount - 1;
+            for (int index = rightIndex; index >= 0; index--) {
+                View itemView = itemViews[index];
+                if (itemView == view) {
+                    currentPos = index;
+                    itemView.setSelected(true);
+                    invalidate();
+            
+                    if (null != buttonSelectedListener) {
+                        buttonSelectedListener.onClickListener(currentPos, view);
+                    }
+                    break;
                 }
-                break;
             }
         }
-    }
+    };
     
+    /**
+     * Set a selected color for selector and others.
+     *
+     * @param color A selected color.
+     */
     public void setSelectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorSelected(color)) {
             invalidate();
@@ -267,6 +303,11 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         }
     }
     
+    /**
+     * Set a unselected color for non-selector.
+     *
+     * @param color A unselected color.
+     */
     public void setUnselectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorUnselected(color)) {
             invalidate();
@@ -275,6 +316,14 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         }
     }
     
+    /**
+     * Set selector position in range.
+     *
+     * @param position A selector position.
+     *
+     * @see #getMaxSelectorCount()
+     * @see #getMinSelectorCount()
+     */
     public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
         if (position > visibleButtonCount) {
             position = (visibleButtonCount - 1);
@@ -288,6 +337,11 @@ public class SingleSelectBoard extends LinearLayout implements View.OnClickListe
         }
     }
     
+    /**
+     * Register a callback to be invoked when this item view is selected.
+     *
+     * @param listener The callback that will run
+     */
     public void setOnItemSelectedListener(OnItemSelectedListener listener) {
         buttonSelectedListener = listener;
     }
