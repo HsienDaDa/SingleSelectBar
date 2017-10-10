@@ -22,6 +22,29 @@ android {
     }
 }
 
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'supermumu'
+
+    publishedGroupId = 'com.supermumu'
+    libraryName = 'SuperMuMu'
+    artifact = 'ui'
+
+    libraryDescription = 'An ui widget.'
+    siteUrl = 'https://github.com/ImDobyDad/SingleSelectBoard'
+    issuesUrl = 'https://github.com/ImDobyDad/SingleSelectBoard/issues'
+    gitUrl = 'https://github.com/ImDobyDad/SingleSelectBoard.git'
+
+    libraryVersion = '1.0.0'
+    developerId = 'supermumu'
+    developerName = 'Hsien Hsu'
+    developerEmail = 'imdobydad@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile("com.android.support.test.espresso:espresso-core:${ANDROID_SUPPORT_ESPRESSO_VERSION}", {
@@ -30,3 +53,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
 }
+
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'
