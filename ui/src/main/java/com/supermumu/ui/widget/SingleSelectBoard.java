@@ -12,6 +12,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -34,6 +35,8 @@ public class SingleSelectBoard extends LinearLayout {
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
     private TextView[] itemViews;
+    
+    private int boardTextAppearance;
     
     public interface OnItemSelectedListener {
         void onClickListener(int position, View view);
@@ -75,11 +78,11 @@ public class SingleSelectBoard extends LinearLayout {
         invalidBackground();
     
         itemViews = new TextView[MAX_COUNT];
-        buildItemView(context, attrs);
+        buildItemView(context);
         itemViews[currentPos].setSelected(true);
     }
     
-    private void buildItemView(Context context, AttributeSet attrs) {
+    private void buildItemView(Context context) {
         final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
         ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
         
@@ -89,12 +92,13 @@ public class SingleSelectBoard extends LinearLayout {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     1);
             
-            TextView view = new TextView(context, attrs);
+            TextView view = new TextView(context);
+            itemViews[i] = view;
             view.setLayoutParams(lp);
-            view.setPadding(0, margin1X, 0, margin1X);
+            TextViewCompat.setTextAppearance(view, boardTextAppearance);
+            view.setPadding(margin1X, margin1X, margin1X, margin1X);
             view.setGravity(Gravity.CENTER);
             view.setTextColor(colorStateList);
-            itemViews[i] = view;
             view.setOnClickListener(clickListener);
             addView(view);
         }
@@ -107,14 +111,31 @@ public class SingleSelectBoard extends LinearLayout {
                 0,
                 0
         );
-    
-        int colorSelected = a.getColor(R.styleable.SingleSelectBoard_colorSelected, 0);
-        if (colorSelected == 0) {
-            colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
+        
+        boardTextAppearance = a.getResourceId(R.styleable.SingleSelectBoard_boardTextAppearance, R.style.TextAppearance_BoardText);
+        
+        // Text colors come from the text appearance first
+        int[] textAttrs = {android.R.attr.textColor};
+        int[] selectedColorAttrs = {android.R.attr.state_selected};
+        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
+        int colorSelected = 0;
+        try {
+            ColorStateList textColors = ta.getColorStateList(0);
+            if (null != textColors) {
+                colorSelected = textColors.getColorForState(selectedColorAttrs, 0);
+            }
+        } finally {
+            ta.recycle();
+        }
+        
+        if (a.hasValue(R.styleable.SingleSelectBoard_colorSelected)) {
+            colorSelected = a.getColor(R.styleable.SingleSelectBoard_colorSelected, 0);
         }
     
-        int colorUnselected = a.getColor(R.styleable.SingleSelectBoard_colorUnselected, 0);
-        if (colorUnselected == 0) {
+        int colorUnselected;
+        if (a.hasValue(R.styleable.SingleSelectBoard_colorUnselected)) {
+            colorUnselected = a.getColor(R.styleable.SingleSelectBoard_colorUnselected, 0);
+        } else {
             colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
         }
         

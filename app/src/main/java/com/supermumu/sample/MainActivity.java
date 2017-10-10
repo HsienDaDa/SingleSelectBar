@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         selectBoard.setItems(list.subList(0, 3));
         title = sampleView.findViewById(R.id.title);
         final TextView result2 = sampleView.findViewById(R.id.result);
-        title.setText("Three items:\n1. bold text\n2. large text");
+        title.setText("Three items:\n - customize text appearance");
         selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
             @Override
             public void onClickListener(int position, View view) {
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         selectBoard.setUnselectedColor(Color.BLACK);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
-        title.setText("Four items: \n1. custom selected/unselected colors");
+        title.setText("Four items: \n - customize selected/unselected colors");
         selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
             @Override
             public void onClickListener(int position, View view) {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         selectBoard.setItems(list.subList(0, 5));
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
-        title.setText("Five items:\n1. custom height of board");
+        title.setText("Five items:\n - customize height of board");
         selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
             @Override
             public void onClickListener(int position, View view) {

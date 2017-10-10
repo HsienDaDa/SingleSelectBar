@@ -34,7 +34,6 @@
         android:layout_width="0dp"
         android:layout_height="100dp"
         android:layout_margin="4dp"
-        android:textSize="16sp"
         app:colorSelected="@color/colorPrimary"
         app:colorUnselected="@android:color/white"
         app:layout_constraintLeft_toLeftOf="parent"
