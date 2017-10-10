@@ -3,5 +3,6 @@
     <declare-styleable name="SingleSelectBoard">
         <attr name="colorSelected" format="color"/>
         <attr name="colorUnselected" format="color"/>
+        <attr name="boardTextAppearance" format="integer"/>
     </declare-styleable>
 </resources>

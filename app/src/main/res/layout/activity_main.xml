@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.supermumu.sample.MainActivity">
+    android:background="@android:color/holo_blue_light"
+    tools:context="com.supermumu.sample.MainActivity"
+    android:orientation="vertical">
 
-    <com.supermumu.ui.widget.SingleSelectBoard
-        android:id="@+id/single_select_board"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:colorSelected="@color/colorPrimary"
-        app:colorUnselected="@android:color/white"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+    <include
+        layout="@layout/select_board_layout"
+        android:id="@+id/sample_1"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+    <include
+        layout="@layout/select_board_layout_with_large_bold_text"
+        android:id="@+id/sample_2"/>
 
-</android.support.constraint.ConstraintLayout>
+    <include
+        layout="@layout/select_board_layout"
+        android:id="@+id/sample_3"/>
+
+    <include
+        layout="@layout/select_board_layout_with_higher"
+        android:id="@+id/sample_4"/>
+
+</LinearLayout>

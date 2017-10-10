@@ -1,6 +1,10 @@
 package com.supermumu.ui.helper;
 
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -12,30 +16,66 @@ import android.support.annotation.ColorInt;
 
 public class SelectBoardResHelper {
     
+    private Paint selectedColorPaint = new Paint();
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private float roundRadius;
     private int strokeWidth;
     
+    private float[] backgroundCornerRadii;
+    private float[] startCornerRadii;
+    private float[] centerCornerRadii;
+    private float[] endCornerRadii;
+    
+    private ColorStateList textColor;
+    
     public SelectBoardResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
-        this.colorSelected = colorSelected;
-        this.colorUnselected = colorUnselected;
+        setColorSelected(colorSelected);
+        setColorUnselected(colorUnselected);
         this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
+    
+        backgroundCornerRadii = new float[]{roundRadius, roundRadius, roundRadius, roundRadius,roundRadius, roundRadius, roundRadius, roundRadius};
+        startCornerRadii = new float[]{roundRadius, roundRadius, 0, 0, 0, 0, roundRadius, roundRadius};
+        centerCornerRadii = new float[]{0, 0, 0, 0, 0, 0, 0, 0};
+        endCornerRadii = new float[]{0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
     }
     
-    public Drawable getStartDrawable() {
-        float[] cornerRadii = {roundRadius, roundRadius, 0, 0, 0, 0, roundRadius, roundRadius};
-        return getCornerStateDrawable(cornerRadii);
+    public boolean setColorSelected(@ColorInt int colorSelected) {
+        boolean hasChanged = false;
+        if (this.colorSelected != colorSelected) {
+            this.colorSelected = colorSelected;
+            selectedColorPaint.setColor(colorSelected);
+            updateTextColor();
+            hasChanged = true;
+        }
+        return hasChanged;
     }
     
-    public Drawable getCenterDrawable() {
-        return getCornerStateDrawable(null);
+    public boolean setColorUnselected(@ColorInt int colorUnselected) {
+        boolean hasChanged = false;
+        if (this.colorUnselected != colorUnselected) {
+            this.colorUnselected = colorUnselected;
+            updateTextColor();
+            hasChanged = true;
+        }
+        return hasChanged;
     }
     
-    public Drawable getEndDrawable() {
-        float[] cornerRadii = {0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
-        return getCornerStateDrawable(cornerRadii);
+    public Drawable getBoardBackgroundDrawable() {
+        return getCornerStateDrawable(backgroundCornerRadii);
+    }
+    
+    public float[] getStartCornerRadii() {
+        return startCornerRadii;
+    }
+    
+    public float[] getCenterCornerRadii() {
+        return centerCornerRadii;
+    }
+    
+    public float[] getEndCornerRadii() {
+        return endCornerRadii;
     }
     
     private Drawable getCornerStateDrawable(float[] cornerRadii) {
@@ -59,11 +99,23 @@ public class SelectBoardResHelper {
         return drawable;
     }
     
-    public ColorStateList getTextColorStateList() {
+    private void updateTextColor() {
         int[] colors = new int[] {colorUnselected, colorSelected};
         int[][] states = new int[2][];
         states[0] = new int[] {android.R.attr.state_selected};
         states[1] = new int[] {};
-        return new ColorStateList(states, colors);
+        textColor = new ColorStateList(states, colors);
+    }
+    
+    public ColorStateList getTextColorStateList() {
+        return textColor;
+    }
+    
+    public void drawRect(Canvas canvas, Rect rect) {
+        canvas.drawRect(rect, selectedColorPaint);
+    }
+    
+    public void drawPath(Canvas canvas, Path path) {
+        canvas.drawPath(path, selectedColorPaint);
     }
 }

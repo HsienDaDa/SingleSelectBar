@@ -1,0 +1,11 @@
+<resources>
+    <style name="TextAppearance.FontRegular" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="TextAppearance.BoardText" parent="@style/TextAppearance.FontRegular">
+        <item name="android:textColor">@color/selected_theme_color</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+</resources>
