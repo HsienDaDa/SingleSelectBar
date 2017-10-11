@@ -47,7 +47,7 @@ In Xml:
         app:boardTextAppearance="@style/TextAppearance.CustomText"/>
 ```
 
-**Sets display list of CharSequence(min=2, max=5)**
+**Sets display list of CharSequence(max=5)**
 
 In Java:
 ```java
