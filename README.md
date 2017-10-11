@@ -3,6 +3,8 @@ SingleSelectBoard
 [![Build Status](https://travis-ci.org/com.supermumu/ui.svg?branch=master)](https://travis-ci.org/com.supermumu/ui)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui)
 [![Github file size](https://img.shields.io/github/size/webcaetano/craft/build/phaser-craft.min.js.svg)]()
+[![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
+
 
 SuperMuMu's ui is a Java library with custom view components.
 
