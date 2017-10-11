@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
 
@@ -20,29 +21,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
-ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'supermumu'
-
-    publishedGroupId = 'com.supermumu'
-    libraryName = 'SuperMuMu'
-    artifact = 'ui'
-
-    libraryDescription = 'An ui widget.'
-    siteUrl = 'https://github.com/ImDobyDad/SingleSelectBoard'
-    issuesUrl = 'https://github.com/ImDobyDad/SingleSelectBoard/issues'
-    gitUrl = 'https://github.com/ImDobyDad/SingleSelectBoard.git'
-
-    libraryVersion = '1.0.0'
-    developerId = 'supermumu'
-    developerName = 'Hsien Hsu'
-    developerEmail = 'imdobydad@gmail.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
+publish {
+    repoName="maven"
+    userOrg = 'dobydad'
+    groupId = 'com.supermumu'
+    artifactId = 'ui'
+    publishVersion = '1.0.0'
+    desc = 'An ui widget '
+    repoName="maven"
+    website = 'https://github.com/ImDobyDad/SingleSelectBoard'
 }
 
 dependencies {
@@ -53,6 +46,14 @@ dependencies {
     compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
 }
+tasks.withType(Javadoc).all {
+    enabled = false
+}
 
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'
+tasks.withType(Javadoc) {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        links "http://docs.oracle.com/javase/7/docs/api"
+    }
+}
