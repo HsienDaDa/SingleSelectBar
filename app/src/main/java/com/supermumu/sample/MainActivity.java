@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
         TextView title = sampleView.findViewById(R.id.title);
         final TextView result1 = sampleView.findViewById(R.id.result);
         title.setText("Two items(default style)");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
+        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
-            public void onClickListener(int position, View view) {
+            public void onSelect(int position, View view) {
                 result1.setText(list.get(position));
             }
         });
@@ -43,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         title = sampleView.findViewById(R.id.title);
         final TextView result2 = sampleView.findViewById(R.id.result);
         title.setText("Three items:\n - customize text appearance");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
+        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
-            public void onClickListener(int position, View view) {
+            public void onSelect(int position, View view) {
                 result2.setText(list.get(position));
             }
         });
@@ -58,22 +58,22 @@ public class MainActivity extends AppCompatActivity {
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
         title.setText("Four items: \n - customize selected/unselected colors ");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
+        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
-            public void onClickListener(int position, View view) {
+            public void onSelect(int position, View view) {
                 result3.setText(list.get(position));
             }
         });
     
         sampleView = findViewById(R.id.sample_4);
         selectBoard = sampleView.findViewById(R.id.single_select_board);
-        selectBoard.setItems(list.subList(0, 5));
+        selectBoard.setItems(list.subList(0, 5), 2);
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
         title.setText("Five items:\n - customize height of board");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
+        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
-            public void onClickListener(int position, View view) {
+            public void onSelect(int position, View view) {
                 result4.setText(list.get(position));
             }
         });

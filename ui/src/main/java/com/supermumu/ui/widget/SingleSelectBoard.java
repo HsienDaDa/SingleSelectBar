@@ -38,11 +38,11 @@ public class SingleSelectBoard extends LinearLayout {
     
     private int boardTextAppearance;
     
-    public interface OnItemSelectedListener {
-        void onClickListener(int position, View view);
+    public interface OnItemSelectListener {
+        void onSelect(int position, View view);
     }
     
-    private OnItemSelectedListener buttonSelectedListener;
+    private OnItemSelectListener buttonSelectedListener;
     
     private SelectBoardResHelper selectBoardResHelper;
     private int visibleButtonCount;
@@ -89,7 +89,7 @@ public class SingleSelectBoard extends LinearLayout {
         for (int i=0; i<MAX_COUNT; i++) {
             LayoutParams lp = new LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                     1);
             
             TextView view = new TextView(context);
@@ -303,7 +303,7 @@ public class SingleSelectBoard extends LinearLayout {
                     invalidate();
             
                     if (null != buttonSelectedListener) {
-                        buttonSelectedListener.onClickListener(currentPos, view);
+                        buttonSelectedListener.onSelect(currentPos, view);
                     }
                     break;
                 }
@@ -363,7 +363,7 @@ public class SingleSelectBoard extends LinearLayout {
      *
      * @param listener The callback that will run
      */
-    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+    public void setOnItemSelectedListener(OnItemSelectListener listener) {
         buttonSelectedListener = listener;
     }
     
