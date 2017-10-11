@@ -32,7 +32,7 @@ publish {
     userOrg = 'supermumu'
     groupId = 'com.supermumu'
     artifactId = 'ui'
-    publishVersion = '1.0.0'
+    publishVersion = '1.0.1'
     desc = 'An ui widget '
     website = 'https://github.com/ImDobyDad/SingleSelectBoard'
 }
