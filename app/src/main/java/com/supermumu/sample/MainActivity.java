@@ -26,56 +26,56 @@ public class MainActivity extends AppCompatActivity {
         
         View sampleView = findViewById(R.id.sample_1);
         SingleSelectBoard selectBoard = sampleView.findViewById(R.id.single_select_board);
-        selectBoard.setItems(list.subList(0, 2));
         TextView title = sampleView.findViewById(R.id.title);
         final TextView result1 = sampleView.findViewById(R.id.result);
         title.setText("Two items(default style)");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
+        selectBoard.setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
             public void onSelect(int position, View view) {
                 result1.setText(list.get(position));
             }
         });
+        selectBoard.setItems(list.subList(0, 2));
     
         sampleView = findViewById(R.id.sample_2);
         selectBoard = sampleView.findViewById(R.id.single_select_board);
-        selectBoard.setItems(list.subList(0, 3));
         title = sampleView.findViewById(R.id.title);
         final TextView result2 = sampleView.findViewById(R.id.result);
         title.setText("Three items:\n - customize text appearance");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
+        selectBoard.setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
             public void onSelect(int position, View view) {
                 result2.setText(list.get(position));
             }
         });
+        selectBoard.setItems(list.subList(0, 3));
     
         sampleView = findViewById(R.id.sample_3);
         selectBoard = sampleView.findViewById(R.id.single_select_board);
-        selectBoard.setItems(list.subList(0, 4));
         selectBoard.setSelectedColor(Color.RED);
         selectBoard.setUnselectedColor(Color.BLACK);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
         title.setText("Four items: \n - customize selected/unselected colors ");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
+        selectBoard.setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
             public void onSelect(int position, View view) {
                 result3.setText(list.get(position));
             }
         });
+        selectBoard.setItems(list.subList(0, 4));
     
         sampleView = findViewById(R.id.sample_4);
         selectBoard = sampleView.findViewById(R.id.single_select_board);
-        selectBoard.setItems(list.subList(0, 5), 2);
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
         title.setText("Five items:\n - customize height of board");
-        selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectListener() {
+        selectBoard.setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
             public void onSelect(int position, View view) {
                 result4.setText(list.get(position));
             }
         });
+        selectBoard.setItems(list.subList(0, 5), 2);
     }
 }

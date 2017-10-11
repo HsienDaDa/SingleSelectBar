@@ -42,7 +42,7 @@ public class SingleSelectBoard extends LinearLayout {
         void onSelect(int position, View view);
     }
     
-    private OnItemSelectListener buttonSelectedListener;
+    private OnItemSelectListener itemSelectListener;
     
     private SelectBoardResHelper selectBoardResHelper;
     private int visibleButtonCount;
@@ -287,12 +287,8 @@ public class SingleSelectBoard extends LinearLayout {
         @Override
         public void onClick(View view) {
             View previousView = itemViews[currentPos];
-            if (previousView == view && view.isSelected()) {
-                return;
-            }
-    
-            previousPos = currentPos;
             previousView.setSelected(false);
+            previousPos = currentPos;
     
             int rightIndex = visibleButtonCount - 1;
             for (int index = rightIndex; index >= 0; index--) {
@@ -302,8 +298,8 @@ public class SingleSelectBoard extends LinearLayout {
                     itemView.setSelected(true);
                     invalidate();
             
-                    if (null != buttonSelectedListener) {
-                        buttonSelectedListener.onSelect(currentPos, view);
+                    if (null != itemSelectListener) {
+                        itemSelectListener.onSelect(currentPos, view);
                     }
                     break;
                 }
@@ -348,13 +344,13 @@ public class SingleSelectBoard extends LinearLayout {
     public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
         if (position > visibleButtonCount) {
             position = (visibleButtonCount - 1);
+        } else if (position < 0) {
+            position = 0;
         }
         
-        if (position >= 0 && currentPos != position) {
-            View itemView = itemViews[position];
-            if (itemView.getVisibility() == View.VISIBLE) {
-                itemView.callOnClick();
-            }
+        View itemView = itemViews[position];
+        if (itemView.getVisibility() == View.VISIBLE) {
+            itemView.callOnClick();
         }
     }
     
@@ -363,8 +359,8 @@ public class SingleSelectBoard extends LinearLayout {
      *
      * @param listener The callback that will run
      */
-    public void setOnItemSelectedListener(OnItemSelectListener listener) {
-        buttonSelectedListener = listener;
+    public void setOnItemSelectListener(OnItemSelectListener listener) {
+        itemSelectListener = listener;
     }
     
     private void invalidBackground() {
