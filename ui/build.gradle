@@ -29,12 +29,11 @@ android {
 
 publish {
     repoName="maven"
-    userOrg = 'dobydad'
+    userOrg = 'supermumu'
     groupId = 'com.supermumu'
     artifactId = 'ui'
     publishVersion = '1.0.0'
     desc = 'An ui widget '
-    repoName="maven"
     website = 'https://github.com/ImDobyDad/SingleSelectBoard'
 }
 
