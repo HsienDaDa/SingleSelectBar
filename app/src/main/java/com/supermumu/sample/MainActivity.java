@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         selectBoard.setUnselectedColor(Color.BLACK);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
-        title.setText("Four items: \n - customize selected/unselected colors");
+        title.setText("Four items: \n - customize selected/unselected colors ");
         selectBoard.setOnItemSelectedListener(new SingleSelectBoard.OnItemSelectedListener() {
             @Override
             public void onClickListener(int position, View view) {
