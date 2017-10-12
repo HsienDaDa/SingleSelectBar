@@ -11,7 +11,9 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -31,7 +33,7 @@ import java.util.Locale;
  */
 
 public class SingleSelectBoard extends LinearLayout {
-    private static final long SCROLL_ANIMATION_DURATION_MS = 120L;
+    private static final float TOTAL_TRANSITION_COUNT = 15.0F;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
     private TextView[] itemViews;
@@ -52,7 +54,7 @@ public class SingleSelectBoard extends LinearLayout {
     private RectF selectedRectF = new RectF();
     private Path selectedPath = new Path();
     
-    private float transitionOffset;
+    private float transitionX;
     private int currentPos = 0;
     private int previousPos = 0;
     
@@ -115,19 +117,7 @@ public class SingleSelectBoard extends LinearLayout {
         boardTextAppearance = a.getResourceId(R.styleable.SingleSelectBoard_boardTextAppearance, R.style.TextAppearance_BoardText);
         
         // Text colors come from the text appearance first
-        int[] textAttrs = {android.R.attr.textColor};
-        int[] selectedColorAttrs = {android.R.attr.state_selected};
-        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
-        int colorSelected = 0;
-        try {
-            ColorStateList textColors = ta.getColorStateList(0);
-            if (null != textColors) {
-                colorSelected = textColors.getColorForState(selectedColorAttrs, 0);
-            }
-        } finally {
-            ta.recycle();
-        }
-        
+        int colorSelected = getSelectedColorFromStyle(context);
         if (a.hasValue(R.styleable.SingleSelectBoard_colorSelected)) {
             colorSelected = a.getColor(R.styleable.SingleSelectBoard_colorSelected, 0);
         }
@@ -177,22 +167,40 @@ public class SingleSelectBoard extends LinearLayout {
         View currentView = itemViews[currentPos];
         final View previousView = itemViews[previousPos];
         if (previousPos == currentPos) {
-            transitionOffset = 0F;
-            drawSelectedButton(canvas, currentView, currentPos);
+            drawSelectedButtonFinish(canvas, currentView);
         } else {
-            final int transitionCount = (Math.abs(currentPos - previousPos) * 3);
             float bothViewsDistance = (currentView.getX() - previousView.getX());
-            float offset = (bothViewsDistance / transitionCount);
-            transitionOffset += offset;
-            if (isEndTransition(transitionOffset - bothViewsDistance)) {
-                transitionOffset = 0F;
-                drawSelectedButton(canvas, currentView, currentPos);
+            transitionX += (bothViewsDistance / TOTAL_TRANSITION_COUNT);
+            if (isEndTransition(transitionX - bothViewsDistance)) {
+                drawSelectedButtonFinish(canvas, currentView);
                 previousPos = currentPos;
             } else {
                 drawSelectedButton(canvas, previousView, previousPos);
-                postInvalidateDelayed(SCROLL_ANIMATION_DURATION_MS / transitionCount);
+                ViewCompat.postInvalidateOnAnimation(this);
             }
         }
+    }
+    
+    private void drawSelectedButtonFinish(Canvas canvas, View view) {
+        transitionX = 0F;
+        drawSelectedButton(canvas, view, currentPos);
+    }
+    
+    private int getSelectedColorFromStyle(Context context) {
+        int[] textAttrs = {android.R.attr.textColor};
+        int[] selectedColorAttrs = {android.R.attr.state_selected};
+        
+        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
+        int colorSelected = 0;
+        try {
+            ColorStateList textColors = ta.getColorStateList(0);
+            if (null != textColors) {
+                colorSelected = textColors.getColorForState(selectedColorAttrs, 0);
+            }
+        } finally {
+            ta.recycle();
+        }
+        return colorSelected;
     }
     
     private boolean isEndTransition(float nextX) {
@@ -204,14 +212,15 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     private void drawSelectedButton(Canvas canvas, View view, int index) {
-        final float left = view.getX() + transitionOffset;
+        final float left = view.getX() + transitionX;
         final float top = 0;
         final float right = left + view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
-        selectedRectF.set(left, top, right, bottom);
         if (index == 0) {
+            selectedRectF.set(left, top, right, bottom);
             selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getStartCornerRadii(), Path.Direction.CCW);
         } else if (index == visibleButtonCount - 1) {
+            selectedRectF.set(left, top, right, bottom);
             selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getEndCornerRadii(), Path.Direction.CCW);
         } else {
             selectedPath.moveTo(left, top);
@@ -308,9 +317,27 @@ public class SingleSelectBoard extends LinearLayout {
     };
     
     /**
+     * Set a text appearance for all items.
+     *
+     * @param textAppearance The style of board text.
+     */
+    public void setItemTextAppearance(@StyleRes int textAppearance) {
+        boardTextAppearance = textAppearance;
+    
+        int colorSelected = getSelectedColorFromStyle(getContext());
+        if (colorSelected > 0) {
+            selectBoardResHelper.setColorSelected(colorSelected);
+        }
+        
+        for (TextView view : itemViews) {
+            TextViewCompat.setTextAppearance(view, textAppearance);
+        }
+    }
+    
+    /**
      * Set a selected color for selector and others.
      *
-     * @param color A selected color.
+     * @param color The color of selected board text.
      */
     public void setSelectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorSelected(color)) {
@@ -323,7 +350,7 @@ public class SingleSelectBoard extends LinearLayout {
     /**
      * Set a unselected color for non-selector.
      *
-     * @param color A unselected color.
+     * @param color The color of unselected board text.
      */
     public void setUnselectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorUnselected(color)) {
