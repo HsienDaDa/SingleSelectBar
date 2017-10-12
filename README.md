@@ -5,6 +5,7 @@ SingleSelectBoard
 [![Github file size](https://img.shields.io/github/size/webcaetano/craft/build/phaser-craft.min.js.svg)]()
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 
+<img src="https://user-images.githubusercontent.com/32517342/31512085-536bf2ee-afbc-11e7-8703-ed22f349fe13.png" width="30%" />
 
 SuperMuMu's ui is a Java library with custom view components.
 
