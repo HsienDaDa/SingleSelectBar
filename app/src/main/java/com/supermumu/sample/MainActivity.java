@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         selectBoard = sampleView.findViewById(R.id.single_select_board);
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
-        title.setText("Five items:\n - customize height of board");
+        title.setText("Five items:\n - customize height\n - customize stroke width\n - customize zero board elevation");
         selectBoard.setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
             @Override
             public void onSelect(int position, View view) {
