@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.util.AttributeSet;
@@ -115,19 +116,7 @@ public class SingleSelectBoard extends LinearLayout {
         boardTextAppearance = a.getResourceId(R.styleable.SingleSelectBoard_boardTextAppearance, R.style.TextAppearance_BoardText);
         
         // Text colors come from the text appearance first
-        int[] textAttrs = {android.R.attr.textColor};
-        int[] selectedColorAttrs = {android.R.attr.state_selected};
-        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
-        int colorSelected = 0;
-        try {
-            ColorStateList textColors = ta.getColorStateList(0);
-            if (null != textColors) {
-                colorSelected = textColors.getColorForState(selectedColorAttrs, 0);
-            }
-        } finally {
-            ta.recycle();
-        }
-        
+        int colorSelected = getSelectedColorFromStyle(context);
         if (a.hasValue(R.styleable.SingleSelectBoard_colorSelected)) {
             colorSelected = a.getColor(R.styleable.SingleSelectBoard_colorSelected, 0);
         }
@@ -193,6 +182,23 @@ public class SingleSelectBoard extends LinearLayout {
                 postInvalidateDelayed(SCROLL_ANIMATION_DURATION_MS / transitionCount);
             }
         }
+    }
+    
+    private int getSelectedColorFromStyle(Context context) {
+        int[] textAttrs = {android.R.attr.textColor};
+        int[] selectedColorAttrs = {android.R.attr.state_selected};
+        
+        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
+        int colorSelected = 0;
+        try {
+            ColorStateList textColors = ta.getColorStateList(0);
+            if (null != textColors) {
+                colorSelected = textColors.getColorForState(selectedColorAttrs, 0);
+            }
+        } finally {
+            ta.recycle();
+        }
+        return colorSelected;
     }
     
     private boolean isEndTransition(float nextX) {
@@ -308,6 +314,24 @@ public class SingleSelectBoard extends LinearLayout {
     };
     
     /**
+     * Set a text appearance for all items.
+     *
+     * @param textAppearance A text style
+     */
+    public void setItemTextAppearance(@StyleRes int textAppearance) {
+        boardTextAppearance = textAppearance;
+    
+        int colorSelected = getSelectedColorFromStyle(getContext());
+        if (colorSelected > 0) {
+            selectBoardResHelper.setColorSelected(colorSelected);
+        }
+        
+        for (TextView view : itemViews) {
+            TextViewCompat.setTextAppearance(view, textAppearance);
+        }
+    }
+    
+    /**
      * Set a selected color for selector and others.
      *
      * @param color A selected color.
@@ -323,7 +347,7 @@ public class SingleSelectBoard extends LinearLayout {
     /**
      * Set a unselected color for non-selector.
      *
-     * @param color A unselected color.
+     * @param color An unselected color.
      */
     public void setUnselectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorUnselected(color)) {
