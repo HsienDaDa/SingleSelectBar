@@ -38,8 +38,8 @@ In Xml:
 <com.supermumu.ui.widget.SingleSelectBoard
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:colorSelected="@color/colorPrimary"
-        app:colorUnselected="@android:color/white"
+        app:boardColorSelected="@color/colorPrimary"
+        app:boardColorUnselected="@android:color/white"
         app:boardTextAppearance="@style/TextAppearance.CustomText"
         app:boardStrokeWidth="3dp"/>
 ```
