@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.IntRange;
@@ -131,13 +130,6 @@ public class SingleSelectBoard extends LinearLayout {
             colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
         }
         
-        float boardElevation;
-        if (a.hasValue(R.styleable.SingleSelectBoard_boardElevation)) {
-            boardElevation = a.getDimension(R.styleable.SingleSelectBoard_boardElevation, 0);
-        } else {
-            boardElevation = context.getResources().getDimension(R.dimen.single_select_board_elevation);
-        }
-        
         if (a.hasValue(R.styleable.SingleSelectBoard_boardStrokeWidth)) {
             dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBoard_boardStrokeWidth, 0);
         } else {
@@ -145,9 +137,6 @@ public class SingleSelectBoard extends LinearLayout {
         }
         a.recycle();
     
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setElevation(boardElevation);
-        }
         int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_radius);
         selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
     }

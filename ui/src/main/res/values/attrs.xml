@@ -5,6 +5,5 @@
         <attr name="boardColorUnselected" format="color"/>
         <attr name="boardTextAppearance" format="integer"/>
         <attr name="boardStrokeWidth" format="dimension"/>
-        <attr name="boardElevation" format="dimension"/>
     </declare-styleable>
 </resources>

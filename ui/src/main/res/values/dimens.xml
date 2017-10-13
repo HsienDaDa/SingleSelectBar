@@ -9,5 +9,4 @@
 
     <dimen name="single_select_board_stroke_width">1dp</dimen>
     <dimen name="single_select_board_radius">@dimen/margin_2x</dimen>
-    <dimen name="single_select_board_elevation">6dp</dimen>
 </resources>
