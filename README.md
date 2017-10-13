@@ -18,20 +18,20 @@ SuperMuMu's ui is a Java library with custom view components.
   * To use SuperMuMu-UI in Android
 ```
 dependencies {
-    compile 'com.supermumu:ui:1.0.2'
+    compile 'com.supermumu:ui:1.0.3'
 }
 ```
 
 ### How to use?
-**Default style selected(color/colorPrimary) and unselected(android:color/white)**
-
-**Define your selected and unselected color.**
+**Use default style or define customize style via yourself.**
 
 In Java:
 ```java
 SingleSelectBoard board = new SingleSelectBoard(context);
 board.setSelectedColor(Color.RED);
 board.setUnselectedColor(Color.BLACK);
+board.setTextAlignment(R.style.text_appearance);
+board.setBoardStrokeWidth(4);
 ```
 In Xml:
 ```xml
@@ -39,17 +39,9 @@ In Xml:
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:colorSelected="@color/colorPrimary"
-        app:colorUnselected="@android:color/white"/>
-```
-
-**Define your textAooearance.**
-
-In Xml:
-```xml
-<com.supermumu.ui.widget.SingleSelectBoard
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:boardTextAppearance="@style/TextAppearance.CustomText"/>
+        app:colorUnselected="@android:color/white"
+        app:boardTextAppearance="@style/TextAppearance.CustomText"
+        app:boardStrokeWidth="3dp"/>
 ```
 
 **Sets display list of CharSequence(max=5)**
