@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Dimension;
 
 /**
  * Created by hsienhsu on 2017/10/5.
@@ -57,6 +58,15 @@ public class SelectBoardResHelper {
         if (this.colorUnselected != colorUnselected) {
             this.colorUnselected = colorUnselected;
             updateTextColor();
+            hasChanged = true;
+        }
+        return hasChanged;
+    }
+    
+    public boolean setBoardStrokeWidth(@Dimension int strokeWidth) {
+        boolean hasChanged = false;
+        if (this.strokeWidth != strokeWidth) {
+            this.strokeWidth = strokeWidth;
             hasChanged = true;
         }
         return hasChanged;

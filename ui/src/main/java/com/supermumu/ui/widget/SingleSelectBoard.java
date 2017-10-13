@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Dimension;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
@@ -118,24 +119,26 @@ public class SingleSelectBoard extends LinearLayout {
         
         // Text colors come from the text appearance first
         int colorSelected = getSelectedColorFromStyle(context);
-        if (a.hasValue(R.styleable.SingleSelectBoard_colorSelected)) {
-            colorSelected = a.getColor(R.styleable.SingleSelectBoard_colorSelected, 0);
+        if (colorSelected == -1 && a.hasValue(R.styleable.SingleSelectBoard_boardColorSelected)) {
+            colorSelected = a.getColor(R.styleable.SingleSelectBoard_boardColorSelected, 0);
         }
     
         int colorUnselected;
-        if (a.hasValue(R.styleable.SingleSelectBoard_colorUnselected)) {
-            colorUnselected = a.getColor(R.styleable.SingleSelectBoard_colorUnselected, 0);
+        if (a.hasValue(R.styleable.SingleSelectBoard_boardColorUnselected)) {
+            colorUnselected = a.getColor(R.styleable.SingleSelectBoard_boardColorUnselected, 0);
         } else {
             colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
         }
         
+        if (a.hasValue(R.styleable.SingleSelectBoard_boardStrokeWidth)) {
+            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBoard_boardStrokeWidth, 0);
+        } else {
+            dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_stroke_width);
+        }
         a.recycle();
     
         int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_radius);
-        int strokeWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_stroke_width);
-        dividerWidth = strokeWidth;
-    
-        selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, strokeWidth);
+        selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
     }
     
     @Override
@@ -150,6 +153,9 @@ public class SingleSelectBoard extends LinearLayout {
         dividerRect.top = 0;
         dividerRect.bottom = getMeasuredHeight();
         dividerRect.left = - (dividerWidth / 2);
+        if (dividerRect.left == 0) {
+            dividerRect.left = -1;
+        }
         dividerRect.right = 0;
     
         int dividerCount = (visibleButtonCount - 1);
@@ -191,7 +197,7 @@ public class SingleSelectBoard extends LinearLayout {
         int[] selectedColorAttrs = {android.R.attr.state_selected};
         
         final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
-        int colorSelected = 0;
+        int colorSelected = -1;
         try {
             ColorStateList textColors = ta.getColorStateList(0);
             if (null != textColors) {
@@ -325,7 +331,7 @@ public class SingleSelectBoard extends LinearLayout {
         boardTextAppearance = textAppearance;
     
         int colorSelected = getSelectedColorFromStyle(getContext());
-        if (colorSelected > 0) {
+        if (colorSelected >= 0) {
             selectBoardResHelper.setColorSelected(colorSelected);
         }
         
@@ -337,7 +343,7 @@ public class SingleSelectBoard extends LinearLayout {
     /**
      * Set a selected color for selector and others.
      *
-     * @param color The color of selected board text.
+     * @param color The color of selected.
      */
     public void setSelectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorSelected(color)) {
@@ -348,15 +354,26 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     /**
-     * Set a unselected color for non-selector.
+     * Set an unselected color for non-selector.
      *
-     * @param color The color of unselected board text.
+     * @param color The color of unselected.
      */
     public void setUnselectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorUnselected(color)) {
             invalidate();
             invalidBackground();
             invalidTextColor();
+        }
+    }
+    
+    /**
+     * Set a dimension for board and divider.
+     *
+     * @param width The width of board and divider.
+     */
+    public void setBoardStrokeWidth(@Dimension int width) {
+        if (selectBoardResHelper.setBoardStrokeWidth(width)) {
+            invalidate();
         }
     }
     

@@ -5,6 +5,9 @@ SingleSelectBoard
 [![Github file size](https://img.shields.io/github/size/webcaetano/craft/build/phaser-craft.min.js.svg)]()
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 
+### Next release v1.0.3 preview:
+
+<img src="https://user-images.githubusercontent.com/32517342/31527961-235fc886-b003-11e7-8b9a-4fde35975dfc.gif" width="30%" />
 
 SuperMuMu's ui is a Java library with custom view components.
 
@@ -78,7 +81,7 @@ board..setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
 SuperMuMu is released under the [Apache 2.0 license](LICENSE).
 
 ```
-Copyright 2008 Google Inc.
+Copyright 2017 by SuperMuMu
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

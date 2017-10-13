@@ -12,7 +12,7 @@
         android:id="@+id/sample_1"/>
 
     <include
-        layout="@layout/select_board_layout_with_large_bold_text"
+        layout="@layout/select_board_layout_with_text_appearance"
         android:id="@+id/sample_2"/>
 
     <include
@@ -20,7 +20,7 @@
         android:id="@+id/sample_3"/>
 
     <include
-        layout="@layout/select_board_layout_with_higher"
+        layout="@layout/select_board_layout_with_customize"
         android:id="@+id/sample_4"/>
 
 </LinearLayout>
