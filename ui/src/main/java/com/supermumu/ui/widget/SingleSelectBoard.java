@@ -176,7 +176,7 @@ public class SingleSelectBoard extends LinearLayout {
         super.onDraw(canvas);
     
         drawDividers(canvas);
-        dispatchDrawSelectedButton(canvas);
+        dispatchDrawSelectedItems(canvas);
     
 //        mDstPath.reset();
 //        mDstPath.lineTo(0, 0);
@@ -212,11 +212,12 @@ public class SingleSelectBoard extends LinearLayout {
         }
     }
     
-    private void dispatchDrawSelectedButton(Canvas canvas) {
+    private void dispatchDrawSelectedItems(Canvas canvas) {
         if (animatorValue >= 1F) {
             transitionX = 0F;
-            drawSelectedButton(canvas, items[currentPos]);
+            transitionPos = currentPos;
             previousPos = currentPos;
+            drawSelectedItem(canvas, items[currentPos]);
         } else {
             if (animatorValue < START_TRANSITION_THRESHOLD) {
                 transitionPos = previousPos;
@@ -225,16 +226,27 @@ public class SingleSelectBoard extends LinearLayout {
             }
             float bothViewsDistance = (items[currentPos].view.getX() - items[previousPos].view.getX());
             transitionX = (bothViewsDistance * animatorValue);
-            drawSelectedButton(canvas, items[previousPos]);
+            drawSelectedItem(canvas, items[previousPos]);
         }
     }
-    private void drawSelectedButton(Canvas canvas, Item item) {
+    private void drawSelectedItem(Canvas canvas, Item item) {
         final float left = item.view.getX() + transitionX;
         final float top = 0;
         final float right = left + item.view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
         final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
+    
+        // change selected/unselected state in scroll transition
+        for (Item selectableItem : items) {
+            int selectedHalfPos = (int) (selectableItem.view.getLeft() + (selectableItem.view.getMeasuredWidth() * 0.5F));
+            if (right >= selectedHalfPos && left <= selectedHalfPos) {
+                selectableItem.view.setSelected(true);
+            } else {
+                selectableItem.view.setSelected(false);
+            }
+        }
         
+        // draw selected item
         selectedPath.reset();
         if (isStartEndAnimatorValue && (transitionPos == 0)) {
             selectedRectF.set(left, top, right, bottom);
