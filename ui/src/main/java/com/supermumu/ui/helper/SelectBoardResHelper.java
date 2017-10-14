@@ -29,6 +29,7 @@ public class SelectBoardResHelper {
     private float[] endCornerRadii;
     
     private ColorStateList textColor;
+    private Drawable cornerStateDrawable;
     
     public SelectBoardResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
         setColorSelected(colorSelected);
@@ -40,6 +41,7 @@ public class SelectBoardResHelper {
         startCornerRadii = new float[]{roundRadius, roundRadius, 0, 0, 0, 0, roundRadius, roundRadius};
         centerCornerRadii = new float[]{0, 0, 0, 0, 0, 0, 0, 0};
         endCornerRadii = new float[]{0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
+        updateCornerStateDrawable();
     }
     
     public boolean setColorSelected(@ColorInt int colorSelected) {
@@ -48,6 +50,7 @@ public class SelectBoardResHelper {
             this.colorSelected = colorSelected;
             selectedColorPaint.setColor(colorSelected);
             updateTextColor();
+            updateCornerStateDrawable();
             hasChanged = true;
         }
         return hasChanged;
@@ -58,6 +61,7 @@ public class SelectBoardResHelper {
         if (this.colorUnselected != colorUnselected) {
             this.colorUnselected = colorUnselected;
             updateTextColor();
+            updateCornerStateDrawable();
             hasChanged = true;
         }
         return hasChanged;
@@ -67,13 +71,14 @@ public class SelectBoardResHelper {
         boolean hasChanged = false;
         if (this.strokeWidth != strokeWidth) {
             this.strokeWidth = strokeWidth;
+            updateCornerStateDrawable();
             hasChanged = true;
         }
         return hasChanged;
     }
     
     public Drawable getBoardBackgroundDrawable() {
-        return getCornerStateDrawable(backgroundCornerRadii);
+        return cornerStateDrawable;
     }
     
     public float[] getStartCornerRadii() {
@@ -88,9 +93,9 @@ public class SelectBoardResHelper {
         return endCornerRadii;
     }
     
-    private Drawable getCornerStateDrawable(float[] cornerRadii) {
-        Drawable unselectedDrawable = getCornetDrawable(false, cornerRadii);
-        Drawable selectedDrawable = getCornetDrawable(true, cornerRadii);
+    private void updateCornerStateDrawable() {
+        Drawable unselectedDrawable = getCornetDrawable(false, backgroundCornerRadii);
+        Drawable selectedDrawable = getCornetDrawable(true, backgroundCornerRadii);
     
         int[][] states = new int[2][];
         states[0] = new int[] {android.R.attr.state_selected};
@@ -98,7 +103,7 @@ public class SelectBoardResHelper {
         StateListDrawable bg = new StateListDrawable();
         bg.addState(states[0], selectedDrawable);
         bg.addState(states[1], unselectedDrawable);
-        return bg;
+        cornerStateDrawable = bg;
     }
     
     private Drawable getCornetDrawable(boolean selected, float[] cornerRadii) {

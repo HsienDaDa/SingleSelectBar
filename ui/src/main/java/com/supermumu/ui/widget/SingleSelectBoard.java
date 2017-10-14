@@ -1,5 +1,8 @@
 package com.supermumu.ui.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -7,19 +10,19 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.TextViewCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -34,12 +37,16 @@ import java.util.Locale;
  */
 
 public class SingleSelectBoard extends LinearLayout {
-    private static final float TOTAL_TRANSITION_COUNT = 15.0F;
+    private static final int ANIMATION_DURATION = 350;
+    private static final float START_TRANSITION_THRESHOLD = 0.05F;
+    private static final float END_TRANSITION_THRESHOLD = 0.95F;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
-    private TextView[] itemViews;
+    private Item[] items;
     
     private int boardTextAppearance;
+    
+    private ValueAnimator scrollAnimator;
     
     public interface OnItemSelectListener {
         void onSelect(int position, View view);
@@ -56,8 +63,11 @@ public class SingleSelectBoard extends LinearLayout {
     private Path selectedPath = new Path();
     
     private float transitionX;
+    private float animatorValue;
+    
     private int currentPos = 0;
     private int previousPos = 0;
+    private int transitionPos = 0;
     
     public SingleSelectBoard(Context context) {
         super(context);
@@ -78,11 +88,10 @@ public class SingleSelectBoard extends LinearLayout {
         setWillNotDraw(false);
         setGravity(Gravity.CENTER_VERTICAL);
         initSelectBoardThemeAttributes(context, attrs);
-        invalidBackground();
+        updateBackground();
     
-        itemViews = new TextView[MAX_COUNT];
+        items = new Item[MAX_COUNT];
         buildItemView(context);
-        itemViews[currentPos].setSelected(true);
     }
     
     private void buildItemView(Context context) {
@@ -96,7 +105,6 @@ public class SingleSelectBoard extends LinearLayout {
                     1);
             
             TextView view = new TextView(context);
-            itemViews[i] = view;
             view.setLayoutParams(lp);
             TextViewCompat.setTextAppearance(view, boardTextAppearance);
             view.setPadding(margin1X, margin1X, margin1X, margin1X);
@@ -104,6 +112,11 @@ public class SingleSelectBoard extends LinearLayout {
             view.setTextColor(colorStateList);
             view.setOnClickListener(clickListener);
             addView(view);
+            
+            Item item = new Item();
+            item.view = view;
+            item.setPosition(i);
+            items[i] = item;
         }
     }
     
@@ -141,57 +154,6 @@ public class SingleSelectBoard extends LinearLayout {
         selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
     }
     
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-    
-        drawDividers(canvas);
-        drawSelectedButton(canvas);
-    }
-    
-    private void drawDividers(Canvas canvas) {
-        dividerRect.top = 0;
-        dividerRect.bottom = getMeasuredHeight();
-        dividerRect.left = - (dividerWidth / 2);
-        if (dividerRect.left == 0) {
-            dividerRect.left = -1;
-        }
-        dividerRect.right = 0;
-    
-        int dividerCount = (visibleButtonCount - 1);
-        for (int i=0; i<dividerCount; i++) {
-            View itemView = itemViews[i];
-            dividerRect.left += itemView.getMeasuredWidth();
-            dividerRect.right = dividerRect.left + dividerWidth;
-            selectBoardResHelper.drawRect(canvas, dividerRect);
-        }
-    }
-    
-    private void drawSelectedButton(Canvas canvas) {
-        selectedPath.reset();
-    
-        View currentView = itemViews[currentPos];
-        final View previousView = itemViews[previousPos];
-        if (previousPos == currentPos) {
-            drawSelectedButtonFinish(canvas, currentView);
-        } else {
-            float bothViewsDistance = (currentView.getX() - previousView.getX());
-            transitionX += (bothViewsDistance / TOTAL_TRANSITION_COUNT);
-            if (isEndTransition(transitionX - bothViewsDistance)) {
-                drawSelectedButtonFinish(canvas, currentView);
-                previousPos = currentPos;
-            } else {
-                drawSelectedButton(canvas, previousView, previousPos);
-                ViewCompat.postInvalidateOnAnimation(this);
-            }
-        }
-    }
-    
-    private void drawSelectedButtonFinish(Canvas canvas, View view) {
-        transitionX = 0F;
-        drawSelectedButton(canvas, view, currentPos);
-    }
-    
     private int getSelectedColorFromStyle(Context context) {
         int[] textAttrs = {android.R.attr.textColor};
         int[] selectedColorAttrs = {android.R.attr.state_selected};
@@ -209,32 +171,86 @@ public class SingleSelectBoard extends LinearLayout {
         return colorSelected;
     }
     
-    private boolean isEndTransition(float nextX) {
-        if (previousPos < currentPos) {
-            return (nextX >= 0);
-        } else {
-            return (nextX <= 0);
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+    
+        drawDividers(canvas);
+        dispatchDrawSelectedButton(canvas);
+    
+//        mDstPath.reset();
+//        mDstPath.lineTo(0, 0);
+//        float stopD = animatorValue * mLength;
+//        float startD = 0;
+//
+//        //获取当前进度的路径，同时赋值给传入的mDstPath
+//        startD = (float) (stopD - ((0.5 - Math.abs(animatorValue - 0.5)) * mLength));
+//        mPathMeasure.getSegment(startD, stopD, mDstPath, true);
+//
+//        canvas.save();
+//        canvas.translate(30+transitionX, 30);
+//        canvas.drawPath(mDstPath, mPaint);
+//        canvas.restore();
+    }
+    
+    private void drawDividers(Canvas canvas) {
+        dividerRect.top = 0;
+        dividerRect.bottom = getMeasuredHeight();
+        dividerRect.left = - (dividerWidth / 2);
+        if (dividerRect.left == 0) {
+            dividerRect.left = -1;
+        }
+        dividerRect.right = 0;
+        
+        for (Item item : items) {
+            if (item.getPosition() > 0 && item.getVisibility() == View.VISIBLE) {
+                selectBoardResHelper.drawRect(canvas, dividerRect);
+            }
+    
+            dividerRect.left += item.view.getMeasuredWidth();
+            dividerRect.right = dividerRect.left + dividerWidth;
         }
     }
     
-    private void drawSelectedButton(Canvas canvas, View view, int index) {
-        final float left = view.getX() + transitionX;
+    private void dispatchDrawSelectedButton(Canvas canvas) {
+        if (animatorValue >= 1F) {
+            transitionX = 0F;
+            drawSelectedButton(canvas, items[currentPos]);
+            previousPos = currentPos;
+        } else {
+            if (animatorValue < START_TRANSITION_THRESHOLD) {
+                transitionPos = previousPos;
+            } else if (animatorValue > END_TRANSITION_THRESHOLD) {
+                transitionPos = currentPos;
+            }
+            float bothViewsDistance = (items[currentPos].view.getX() - items[previousPos].view.getX());
+            transitionX = (bothViewsDistance * animatorValue);
+            drawSelectedButton(canvas, items[previousPos]);
+        }
+    }
+    private void drawSelectedButton(Canvas canvas, Item item) {
+        final float left = item.view.getX() + transitionX;
         final float top = 0;
-        final float right = left + view.getMeasuredWidth();
+        final float right = left + item.view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
-        if (index == 0) {
+        final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
+        
+        selectedPath.reset();
+        if (isStartEndAnimatorValue && (transitionPos == 0)) {
             selectedRectF.set(left, top, right, bottom);
             selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getStartCornerRadii(), Path.Direction.CCW);
-        } else if (index == visibleButtonCount - 1) {
+            selectBoardResHelper.drawPath(canvas, selectedPath);
+        } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
             selectedRectF.set(left, top, right, bottom);
             selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getEndCornerRadii(), Path.Direction.CCW);
+            selectBoardResHelper.drawPath(canvas, selectedPath);
         } else {
             selectedPath.moveTo(left, top);
             selectedPath.lineTo(right, top);
             selectedPath.lineTo(right, bottom);
             selectedPath.lineTo(left, bottom);
+            selectBoardResHelper.drawPath(canvas, selectedPath);
         }
-        selectBoardResHelper.drawPath(canvas, selectedPath);
     }
     
     /**
@@ -259,13 +275,11 @@ public class SingleSelectBoard extends LinearLayout {
     public void setItems(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
-        for (int i=0; i<MAX_COUNT; i++) {
-            TextView itemView = itemViews[i];
-            if (i < visibleButtonCount) {
-                itemView.setText(list.get(i));
-                itemView.setVisibility(View.VISIBLE);
+        for (Item item : items) {
+            if (item.getPosition() < visibleButtonCount) {
+                item.setText(list.get(item.getPosition()));
             } else {
-                itemView.setVisibility(View.GONE);
+                item.setText(null);
             }
         }
     
@@ -301,18 +315,22 @@ public class SingleSelectBoard extends LinearLayout {
     private OnClickListener clickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-            View previousView = itemViews[currentPos];
-            previousView.setSelected(false);
             previousPos = currentPos;
     
-            int rightIndex = visibleButtonCount - 1;
-            for (int index = rightIndex; index >= 0; index--) {
-                View itemView = itemViews[index];
-                if (itemView == view) {
-                    currentPos = index;
-                    itemView.setSelected(true);
-                    invalidate();
+            for (Item item : items) {
+                if (item.view == view) {
+                    currentPos = item.getPosition();
             
+                    ensureScrollAnimator();
+                    if (scrollAnimator.isRunning()) {
+                        scrollAnimator.end();
+                    }
+                    scrollAnimator.start();
+    
+                    if (previousPos == currentPos) {
+                        scrollAnimator.end();
+                    }
+                    
                     if (null != itemSelectListener) {
                         itemSelectListener.onSelect(currentPos, view);
                     }
@@ -321,6 +339,89 @@ public class SingleSelectBoard extends LinearLayout {
             }
         }
     };
+    
+    private void ensureScrollAnimator() {
+        if (null == scrollAnimator) {
+            scrollAnimator = ValueAnimator.ofFloat(0, 1);
+            scrollAnimator.setDuration(ANIMATION_DURATION);
+            scrollAnimator.setInterpolator(new DecelerateInterpolator());
+            scrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    animatorValue = (float) animation.getAnimatedValue();
+                    invalidate();
+                }
+            });
+            scrollAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    items[currentPos].view.setSelected(true);
+                }
+        
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    items[previousPos].view.setSelected(false);
+                }
+            });
+        }
+    }
+    
+//    Path mCirclePath;
+//    Paint mPaint = new Paint();
+//    Path mDstPath;
+//    PathMeasure mPathMeasure;
+//    float mLength;
+//    float animatorValue;
+//    ValueAnimator mValueAnimator;
+//    private void test() {
+//        mCirclePath = new Path();
+//        //路径绘制每段截取出来的路径
+//        mDstPath = new Path();
+//        mPaint.setColor(Color.RED);
+//        mCirclePath.addCircle(20, 20, 40, Path.Direction.CW);
+//
+//        //路径测量类
+//        mPathMeasure = new PathMeasure();
+//        //测量路径
+//        mPathMeasure.setPath(mCirclePath, false);
+//
+//        //获取被测量路径的总长度
+//        mLength = mPathMeasure.getLength();
+//
+//        if (null != mValueAnimator && mValueAnimator.isRunning()) {
+//            mValueAnimator.end();
+//        }
+//        mValueAnimator = ValueAnimator.ofFloat(0, 1);
+//        mValueAnimator.setDuration(ANIMATION_DURATION);
+////        mValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+//        mValueAnimator.setInterpolator(new DecelerateInterpolator());
+//        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animation) {
+//                //获取从0-1的变化值
+//                animatorValue = (float) animation.getAnimatedValue();
+//                Log.d("S", "Hsien_ // [onAnimationUpdate] "+animatorValue);
+//                invalidate();
+//            }
+//        });
+//        mValueAnimator.addListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                super.onAnimationEnd(animation);
+//                Log.d("S", "Hsien_ // [onAnimationEnd] ");
+//                items[currentPos].view.setSelected(true);
+//            }
+//
+//            @Override
+//            public void onAnimationStart(Animator animation) {
+//                super.onAnimationStart(animation);
+//                Log.d("S", "Hsien_ // [onAnimationStart] ");
+//            }
+//        });
+//        mValueAnimator.start();
+//    }
     
     /**
      * Set a text appearance for all items.
@@ -335,8 +436,8 @@ public class SingleSelectBoard extends LinearLayout {
             selectBoardResHelper.setColorSelected(colorSelected);
         }
         
-        for (TextView view : itemViews) {
-            TextViewCompat.setTextAppearance(view, textAppearance);
+        for (Item item : items) {
+            TextViewCompat.setTextAppearance(item.view, textAppearance);
         }
     }
     
@@ -347,9 +448,9 @@ public class SingleSelectBoard extends LinearLayout {
      */
     public void setSelectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorSelected(color)) {
-            invalidate();
-            invalidBackground();
+            updateBackground();
             invalidTextColor();
+            invalidate();
         }
     }
     
@@ -360,9 +461,9 @@ public class SingleSelectBoard extends LinearLayout {
      */
     public void setUnselectedColor(@ColorInt int color) {
         if (selectBoardResHelper.setColorUnselected(color)) {
-            invalidate();
-            invalidBackground();
+            updateBackground();
             invalidTextColor();
+            invalidate();
         }
     }
     
@@ -373,6 +474,7 @@ public class SingleSelectBoard extends LinearLayout {
      */
     public void setBoardStrokeWidth(@Dimension int width) {
         if (selectBoardResHelper.setBoardStrokeWidth(width)) {
+            updateBackground();
             invalidate();
         }
     }
@@ -392,9 +494,9 @@ public class SingleSelectBoard extends LinearLayout {
             position = 0;
         }
         
-        View itemView = itemViews[position];
-        if (itemView.getVisibility() == View.VISIBLE) {
-            itemView.callOnClick();
+        Item item = items[position];
+        if (item.getVisibility() == View.VISIBLE) {
+            item.view.callOnClick();
         }
     }
     
@@ -407,15 +509,56 @@ public class SingleSelectBoard extends LinearLayout {
         itemSelectListener = listener;
     }
     
-    private void invalidBackground() {
-        Drawable boardBackground = selectBoardResHelper.getBoardBackgroundDrawable();
-        setBackground(boardBackground);
+    private void updateBackground() {
+        setBackground(selectBoardResHelper.getBoardBackgroundDrawable());
     }
     
     private void invalidTextColor() {
         ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
-        for (TextView itemView : itemViews) {
-            itemView.setTextColor(colorStateList);
+        for (Item item : items) {
+            item.view.setTextColor(colorStateList);
+        }
+    }
+    
+    private final class Item {
+        TextView view;
+        
+        private int position;
+        private CharSequence text;
+        private int visibility = View.VISIBLE;
+    
+        public int getPosition() {
+            return position;
+        }
+    
+        public void setPosition(int position) {
+            this.position = position;
+        }
+    
+        public CharSequence getText() {
+            return text;
+        }
+    
+        public void setText(CharSequence text) {
+            this.text = text;
+            updateView();
+        }
+    
+        public int getVisibility() {
+            return visibility;
+        }
+        
+        private void updateView() {
+            if (TextUtils.isEmpty(text)) {
+                visibility = View.GONE;
+            } else {
+                visibility = View.VISIBLE;
+            }
+            view.setText(text);
+            
+            if (view.getVisibility() != visibility) {
+                view.setVisibility(visibility);
+            }
         }
     }
 }
