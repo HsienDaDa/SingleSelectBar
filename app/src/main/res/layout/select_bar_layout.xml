@@ -12,7 +12,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:paddingLeft="@dimen/margin_1x"
-        app:layout_constraintBottom_toTopOf="@+id/single_select_board"
+        app:layout_constraintBottom_toTopOf="@+id/single_select_bar"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/result"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -25,12 +25,12 @@
         android:textStyle="bold"
         android:textColor="@android:color/holo_red_light"
         android:layout_marginLeft="@dimen/margin_2x"
-        app:layout_constraintBottom_toTopOf="@+id/single_select_board"
+        app:layout_constraintBottom_toTopOf="@+id/single_select_bar"
         app:layout_constraintLeft_toRightOf="@+id/title"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <com.supermumu.ui.widget.SingleSelectBoard
-        android:id="@+id/single_select_board"
+    <com.supermumu.ui.widget.SingleSelectBar
+        android:id="@+id/single_select_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"

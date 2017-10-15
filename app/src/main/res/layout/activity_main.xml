@@ -8,19 +8,19 @@
     android:orientation="vertical">
 
     <include
-        layout="@layout/select_board_layout"
+        layout="@layout/select_bar_layout"
         android:id="@+id/sample_1"/>
 
     <include
-        layout="@layout/select_board_layout_with_text_appearance"
+        layout="@layout/select_bar_layout_with_text_appearance"
         android:id="@+id/sample_2"/>
 
     <include
-        layout="@layout/select_board_layout"
+        layout="@layout/select_bar_layout"
         android:id="@+id/sample_3"/>
 
     <include
-        layout="@layout/select_board_layout_with_customize"
+        layout="@layout/select_bar_layout_with_customize"
         android:id="@+id/sample_4"/>
 
 </LinearLayout>

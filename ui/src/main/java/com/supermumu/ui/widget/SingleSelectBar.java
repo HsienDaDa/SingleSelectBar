@@ -27,7 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.supermumu.R;
-import com.supermumu.ui.helper.SelectBoardResHelper;
+import com.supermumu.ui.helper.ResHelper;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,25 +36,25 @@ import java.util.Locale;
  * Created by hsienhsu on 2017/9/20.
  */
 
-public class SingleSelectBoard extends LinearLayout {
+public class SingleSelectBar extends LinearLayout {
     private static final int ANIMATION_DURATION = 350;
     private static final float START_TRANSITION_THRESHOLD = 0.05F;
     private static final float END_TRANSITION_THRESHOLD = 0.95F;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
-    private Item[] items;
+    private Tab[] Tabs;
     
-    private int boardTextAppearance;
+    private int itemTextAppearance;
     
     private ValueAnimator scrollAnimator;
     
-    public interface OnItemSelectListener {
+    public interface OnTabSelectListener {
         void onSelect(int position, View view);
     }
     
-    private OnItemSelectListener itemSelectListener;
+    private OnTabSelectListener itemSelectListener;
     
-    private SelectBoardResHelper selectBoardResHelper;
+    private ResHelper resHelper;
     private int visibleButtonCount;
     private int dividerWidth;
     
@@ -69,17 +69,17 @@ public class SingleSelectBoard extends LinearLayout {
     private int previousPos = 0;
     private int transitionPos = 0;
     
-    public SingleSelectBoard(Context context) {
+    public SingleSelectBar(Context context) {
         super(context);
         init(context, null);
     }
     
-    public SingleSelectBoard(Context context, AttributeSet attrs) {
+    public SingleSelectBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
     
-    public SingleSelectBoard(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SingleSelectBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -87,16 +87,16 @@ public class SingleSelectBoard extends LinearLayout {
     private void init(Context context, AttributeSet attrs) {
         setWillNotDraw(false);
         setGravity(Gravity.CENTER_VERTICAL);
-        initSelectBoardThemeAttributes(context, attrs);
+        initSelectBarThemeAttributes(context, attrs);
         updateBackground();
     
-        items = new Item[MAX_COUNT];
-        buildItemView(context);
+        Tabs = new Tab[MAX_COUNT];
+        buildTabView(context);
     }
     
-    private void buildItemView(Context context) {
+    private void buildTabView(Context context) {
         final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
-        ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
+        ColorStateList colorStateList = resHelper.getTextColorStateList();
         
         for (int i=0; i<MAX_COUNT; i++) {
             LayoutParams lp = new LayoutParams(
@@ -106,59 +106,59 @@ public class SingleSelectBoard extends LinearLayout {
             
             TextView view = new TextView(context);
             view.setLayoutParams(lp);
-            TextViewCompat.setTextAppearance(view, boardTextAppearance);
+            TextViewCompat.setTextAppearance(view, itemTextAppearance);
             view.setPadding(margin1X, margin1X, margin1X, margin1X);
             view.setGravity(Gravity.CENTER);
             view.setTextColor(colorStateList);
             view.setOnClickListener(clickListener);
             addView(view);
             
-            Item item = new Item();
-            item.view = view;
-            item.setPosition(i);
-            items[i] = item;
+            Tab Tab = new Tab();
+            Tab.view = view;
+            Tab.setPosition(i);
+            Tabs[i] = Tab;
         }
     }
     
-    private void initSelectBoardThemeAttributes(Context context, AttributeSet attrs) {
+    private void initSelectBarThemeAttributes(Context context, AttributeSet attrs) {
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.SingleSelectBoard,
+                R.styleable.SingleSelectBar,
                 0,
                 0
         );
         
-        boardTextAppearance = a.getResourceId(R.styleable.SingleSelectBoard_boardTextAppearance, R.style.TextAppearance_BoardText);
+        itemTextAppearance = a.getResourceId(R.styleable.SingleSelectBar_tabTextAppearance, R.style.TextAppearance_TabText);
         
         // Text colors come from the text appearance first
         int colorSelected = getSelectedColorFromStyle(context);
-        if (colorSelected == -1 && a.hasValue(R.styleable.SingleSelectBoard_boardColorSelected)) {
-            colorSelected = a.getColor(R.styleable.SingleSelectBoard_boardColorSelected, 0);
+        if (colorSelected == -1 && a.hasValue(R.styleable.SingleSelectBar_tabColorSelected)) {
+            colorSelected = a.getColor(R.styleable.SingleSelectBar_tabColorSelected, 0);
         }
     
         int colorUnselected;
-        if (a.hasValue(R.styleable.SingleSelectBoard_boardColorUnselected)) {
-            colorUnselected = a.getColor(R.styleable.SingleSelectBoard_boardColorUnselected, 0);
+        if (a.hasValue(R.styleable.SingleSelectBar_tabColorUnselected)) {
+            colorUnselected = a.getColor(R.styleable.SingleSelectBar_tabColorUnselected, 0);
         } else {
             colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
         }
         
-        if (a.hasValue(R.styleable.SingleSelectBoard_boardStrokeWidth)) {
-            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBoard_boardStrokeWidth, 0);
+        if (a.hasValue(R.styleable.SingleSelectBar_tabStrokeWidth)) {
+            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_tabStrokeWidth, 0);
         } else {
-            dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_stroke_width);
+            dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width);
         }
         a.recycle();
     
-        int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_board_radius);
-        selectBoardResHelper = new SelectBoardResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
+        int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius);
+        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
     }
     
     private int getSelectedColorFromStyle(Context context) {
         int[] textAttrs = {android.R.attr.textColor};
         int[] selectedColorAttrs = {android.R.attr.state_selected};
         
-        final TypedArray ta = context.obtainStyledAttributes(boardTextAppearance, textAttrs);
+        final TypedArray ta = context.obtainStyledAttributes(itemTextAppearance, textAttrs);
         int colorSelected = -1;
         try {
             ColorStateList textColors = ta.getColorStateList(0);
@@ -176,7 +176,7 @@ public class SingleSelectBoard extends LinearLayout {
         super.onDraw(canvas);
     
         drawDividers(canvas);
-        dispatchDrawSelectedItems(canvas);
+        dispatchDrawSelectedTabs(canvas);
     
 //        mDstPath.reset();
 //        mDstPath.lineTo(0, 0);
@@ -202,96 +202,96 @@ public class SingleSelectBoard extends LinearLayout {
         }
         dividerRect.right = 0;
         
-        for (Item item : items) {
-            if (item.getPosition() > 0 && item.getVisibility() == View.VISIBLE) {
-                selectBoardResHelper.drawRect(canvas, dividerRect);
+        for (Tab Tab : Tabs) {
+            if (Tab.getPosition() > 0 && Tab.getVisibility() == View.VISIBLE) {
+                resHelper.drawRect(canvas, dividerRect);
             }
     
-            dividerRect.left += item.view.getMeasuredWidth();
+            dividerRect.left += Tab.view.getMeasuredWidth();
             dividerRect.right = dividerRect.left + dividerWidth;
         }
     }
     
-    private void dispatchDrawSelectedItems(Canvas canvas) {
+    private void dispatchDrawSelectedTabs(Canvas canvas) {
         if (animatorValue >= 1F) {
             transitionX = 0F;
             transitionPos = currentPos;
             previousPos = currentPos;
-            drawSelectedItem(canvas, items[currentPos]);
+            drawSelectedTab(canvas, Tabs[currentPos]);
         } else {
             if (animatorValue < START_TRANSITION_THRESHOLD) {
                 transitionPos = previousPos;
             } else if (animatorValue > END_TRANSITION_THRESHOLD) {
                 transitionPos = currentPos;
             }
-            float bothViewsDistance = (items[currentPos].view.getX() - items[previousPos].view.getX());
+            float bothViewsDistance = (Tabs[currentPos].view.getX() - Tabs[previousPos].view.getX());
             transitionX = (bothViewsDistance * animatorValue);
-            drawSelectedItem(canvas, items[previousPos]);
+            drawSelectedTab(canvas, Tabs[previousPos]);
         }
     }
-    private void drawSelectedItem(Canvas canvas, Item item) {
-        final float left = item.view.getX() + transitionX;
+    private void drawSelectedTab(Canvas canvas, Tab Tab) {
+        final float left = Tab.view.getX() + transitionX;
         final float top = 0;
-        final float right = left + item.view.getMeasuredWidth();
+        final float right = left + Tab.view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
         final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
     
         // change selected/unselected state in scroll transition
-        for (Item selectableItem : items) {
-            int selectedHalfPos = (int) (selectableItem.view.getLeft() + (selectableItem.view.getMeasuredWidth() * 0.5F));
+        for (Tab selectableTab : Tabs) {
+            int selectedHalfPos = (int) (selectableTab.view.getLeft() + (selectableTab.view.getMeasuredWidth() * 0.5F));
             if (right >= selectedHalfPos && left <= selectedHalfPos) {
-                selectableItem.view.setSelected(true);
+                selectableTab.view.setSelected(true);
             } else {
-                selectableItem.view.setSelected(false);
+                selectableTab.view.setSelected(false);
             }
         }
         
-        // draw selected item
+        // draw selected Tab
         selectedPath.reset();
         if (isStartEndAnimatorValue && (transitionPos == 0)) {
             selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getStartCornerRadii(), Path.Direction.CCW);
-            selectBoardResHelper.drawPath(canvas, selectedPath);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getStartCornerRadii(), Path.Direction.CCW);
+            resHelper.drawPath(canvas, selectedPath);
         } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
             selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, selectBoardResHelper.getEndCornerRadii(), Path.Direction.CCW);
-            selectBoardResHelper.drawPath(canvas, selectedPath);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getEndCornerRadii(), Path.Direction.CCW);
+            resHelper.drawPath(canvas, selectedPath);
         } else {
             selectedPath.moveTo(left, top);
             selectedPath.lineTo(right, top);
             selectedPath.lineTo(right, bottom);
             selectedPath.lineTo(left, bottom);
-            selectBoardResHelper.drawPath(canvas, selectedPath);
+            resHelper.drawPath(canvas, selectedPath);
         }
     }
     
     /**
-     * Set a new list of text to selected board. The texts display give title.
+     * Set a new list of text to tabs. The texts display give title.
      *
      * @param list The list of text to display for all selectors.
      *
      * @throws IndexOutOfBoundsException &nbsp;
      */
-    public void setItems(@NonNull List<CharSequence> list) {
-        setItems(list, 0);
+    public void setTabs(@NonNull List<CharSequence> list) {
+        setTabs(list, 0);
     }
     
     /**
-     * Set a new list of text to selected board with targt position. The texts display give title.
+     * Set a new list of text to tabs with target position. The texts display give title.
      *
      * @param list The list of text to display for all selectors.
      * @param selectorPos A default position to select after data change.
      *
      * @throws IndexOutOfBoundsException &nbsp;
      */
-    public void setItems(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
+    public void setTabs(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
-        for (Item item : items) {
-            if (item.getPosition() < visibleButtonCount) {
-                item.setText(list.get(item.getPosition()));
+        for (Tab Tab : Tabs) {
+            if (Tab.getPosition() < visibleButtonCount) {
+                Tab.setText(list.get(Tab.getPosition()));
             } else {
-                item.setText(null);
+                Tab.setText(null);
             }
         }
     
@@ -299,7 +299,7 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     /**
-     * Get a maximum count for select board.
+     * Get a maximum count for select tabs.
      *
      * @return The maximum count of selectors.
      */
@@ -308,7 +308,7 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     /**
-     * Get a minimum count for select board.
+     * Get a minimum count for select tabs.
      *
      * @return The minimum count of selectors.
      */
@@ -319,7 +319,7 @@ public class SingleSelectBoard extends LinearLayout {
     @IntRange(from = MIN_COUNT, to = MAX_COUNT)
     private int checkButtonCount(int count) {
         if (MIN_COUNT > count || count > MAX_COUNT) {
-            throw new IndexOutOfBoundsException(String.format(Locale.getDefault(), "The item count must be %d to %d", MIN_COUNT, MAX_COUNT));
+            throw new IndexOutOfBoundsException(String.format(Locale.getDefault(), "The Tab count must be %d to %d", MIN_COUNT, MAX_COUNT));
         }
         return count;
     }
@@ -329,9 +329,9 @@ public class SingleSelectBoard extends LinearLayout {
         public void onClick(View view) {
             previousPos = currentPos;
     
-            for (Item item : items) {
-                if (item.view == view) {
-                    currentPos = item.getPosition();
+            for (Tab Tab : Tabs) {
+                if (Tab.view == view) {
+                    currentPos = Tab.getPosition();
             
                     ensureScrollAnimator();
                     if (scrollAnimator.isRunning()) {
@@ -368,13 +368,13 @@ public class SingleSelectBoard extends LinearLayout {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    items[currentPos].view.setSelected(true);
+                    Tabs[currentPos].view.setSelected(true);
                 }
         
                 @Override
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
-                    items[previousPos].view.setSelected(false);
+                    Tabs[previousPos].view.setSelected(false);
                 }
             });
         }
@@ -423,7 +423,7 @@ public class SingleSelectBoard extends LinearLayout {
 //            public void onAnimationEnd(Animator animation) {
 //                super.onAnimationEnd(animation);
 //                Log.d("S", "Hsien_ // [onAnimationEnd] ");
-//                items[currentPos].view.setSelected(true);
+//                Tabs[currentPos].view.setSelected(true);
 //            }
 //
 //            @Override
@@ -436,30 +436,30 @@ public class SingleSelectBoard extends LinearLayout {
 //    }
     
     /**
-     * Set a text appearance for all items.
+     * Set a text appearance for all Tabs.
      *
-     * @param textAppearance The style of board text.
+     * @param textAppearance The style of tab text.
      */
-    public void setItemTextAppearance(@StyleRes int textAppearance) {
-        boardTextAppearance = textAppearance;
+    public void setTabTextAppearance(@StyleRes int textAppearance) {
+        itemTextAppearance = textAppearance;
     
         int colorSelected = getSelectedColorFromStyle(getContext());
         if (colorSelected >= 0) {
-            selectBoardResHelper.setColorSelected(colorSelected);
+            resHelper.setColorSelected(colorSelected);
         }
         
-        for (Item item : items) {
-            TextViewCompat.setTextAppearance(item.view, textAppearance);
+        for (Tab Tab : Tabs) {
+            TextViewCompat.setTextAppearance(Tab.view, textAppearance);
         }
     }
     
     /**
-     * Set a selected color for selector and others.
+     * Set a selected color for selected tab and others.
      *
      * @param color The color of selected.
      */
     public void setSelectedColor(@ColorInt int color) {
-        if (selectBoardResHelper.setColorSelected(color)) {
+        if (resHelper.setColorSelected(color)) {
             updateBackground();
             invalidTextColor();
             invalidate();
@@ -467,12 +467,12 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     /**
-     * Set an unselected color for non-selector.
+     * Set an unselected color for unselected tabs.
      *
      * @param color The color of unselected.
      */
     public void setUnselectedColor(@ColorInt int color) {
-        if (selectBoardResHelper.setColorUnselected(color)) {
+        if (resHelper.setColorUnselected(color)) {
             updateBackground();
             invalidTextColor();
             invalidate();
@@ -480,12 +480,12 @@ public class SingleSelectBoard extends LinearLayout {
     }
     
     /**
-     * Set a dimension for board and divider.
+     * Set a dimension for border and divider.
      *
-     * @param width The width of board and divider.
+     * @param width The width of border and divider.
      */
-    public void setBoardStrokeWidth(@Dimension int width) {
-        if (selectBoardResHelper.setBoardStrokeWidth(width)) {
+    public void setTabStrokeWidth(@Dimension int width) {
+        if (resHelper.setTabStrokeWidth(width)) {
             updateBackground();
             invalidate();
         }
@@ -506,33 +506,33 @@ public class SingleSelectBoard extends LinearLayout {
             position = 0;
         }
         
-        Item item = items[position];
-        if (item.getVisibility() == View.VISIBLE) {
-            item.view.callOnClick();
+        Tab Tab = Tabs[position];
+        if (Tab.getVisibility() == View.VISIBLE) {
+            Tab.view.callOnClick();
         }
     }
     
     /**
-     * Register a callback to be invoked when this item view is selected.
+     * Register a callback to be invoked when this Tab view is selected.
      *
      * @param listener The callback that will run
      */
-    public void setOnItemSelectListener(OnItemSelectListener listener) {
+    public void setOnTabSelectListener(OnTabSelectListener listener) {
         itemSelectListener = listener;
     }
     
     private void updateBackground() {
-        setBackground(selectBoardResHelper.getBoardBackgroundDrawable());
+        setBackground(resHelper.getTabBackgroundDrawable());
     }
     
     private void invalidTextColor() {
-        ColorStateList colorStateList = selectBoardResHelper.getTextColorStateList();
-        for (Item item : items) {
-            item.view.setTextColor(colorStateList);
+        ColorStateList colorStateList = resHelper.getTextColorStateList();
+        for (Tab Tab : Tabs) {
+            Tab.view.setTextColor(colorStateList);
         }
     }
     
-    private final class Item {
+    private final class Tab {
         TextView view;
         
         private int position;

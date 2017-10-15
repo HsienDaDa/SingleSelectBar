@@ -15,7 +15,7 @@ import android.support.annotation.Dimension;
  * Created by hsienhsu on 2017/10/5.
  */
 
-public class SelectBoardResHelper {
+public class ResHelper {
     
     private Paint selectedColorPaint = new Paint();
     private @ColorInt int colorSelected;
@@ -31,7 +31,7 @@ public class SelectBoardResHelper {
     private ColorStateList textColor;
     private Drawable cornerStateDrawable;
     
-    public SelectBoardResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
+    public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
         this.roundRadius = roundRadius;
@@ -67,7 +67,7 @@ public class SelectBoardResHelper {
         return hasChanged;
     }
     
-    public boolean setBoardStrokeWidth(@Dimension int strokeWidth) {
+    public boolean setTabStrokeWidth(@Dimension int strokeWidth) {
         boolean hasChanged = false;
         if (this.strokeWidth != strokeWidth) {
             this.strokeWidth = strokeWidth;
@@ -77,7 +77,7 @@ public class SelectBoardResHelper {
         return hasChanged;
     }
     
-    public Drawable getBoardBackgroundDrawable() {
+    public Drawable getTabBackgroundDrawable() {
         return cornerStateDrawable;
     }
     
