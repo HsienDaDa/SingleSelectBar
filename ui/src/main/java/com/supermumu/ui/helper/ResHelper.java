@@ -11,22 +11,26 @@ import android.graphics.drawable.StateListDrawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 
+import java.util.Arrays;
+
 /**
  * Created by hsienhsu on 2017/10/5.
+ *
+ * @hide
  */
 
 public class ResHelper {
     
-    private Paint selectedColorPaint = new Paint();
+    private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private float roundRadius;
     private int strokeWidth;
     
-    private float[] backgroundCornerRadii;
-    private float[] startCornerRadii;
-    private float[] centerCornerRadii;
-    private float[] endCornerRadii;
+    private float[] backgroundCornerRadii = new float[8];
+    private float[] startCornerRadii = new float[8];
+    private float[] centerCornerRadii = new float[8];
+    private float[] endCornerRadii = new float[8];
     
     private ColorStateList textColor;
     private Drawable cornerStateDrawable;
@@ -37,11 +41,19 @@ public class ResHelper {
         this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
     
-        backgroundCornerRadii = new float[]{roundRadius, roundRadius, roundRadius, roundRadius,roundRadius, roundRadius, roundRadius, roundRadius};
-        startCornerRadii = new float[]{roundRadius, roundRadius, 0, 0, 0, 0, roundRadius, roundRadius};
-        centerCornerRadii = new float[]{0, 0, 0, 0, 0, 0, 0, 0};
-        endCornerRadii = new float[]{0, 0, roundRadius, roundRadius, roundRadius, roundRadius, 0, 0};
+        setRoundRadius(roundRadius);
         updateCornerStateDrawable();
+    }
+    
+    public void setRoundRadius(float roundRadius) {
+        Arrays.fill(backgroundCornerRadii, roundRadius);
+        
+        Arrays.fill(startCornerRadii, 0, 2, roundRadius);
+        Arrays.fill(startCornerRadii, 6, 8, roundRadius);
+        
+        Arrays.fill(centerCornerRadii, 0);
+        
+        Arrays.fill(endCornerRadii, 2, 6, roundRadius);
     }
     
     public boolean setColorSelected(@ColorInt int colorSelected) {
@@ -93,9 +105,13 @@ public class ResHelper {
         return endCornerRadii;
     }
     
+    public float[] getBackgroundCornerRadii() {
+        return backgroundCornerRadii;
+    }
+    
     private void updateCornerStateDrawable() {
-        Drawable unselectedDrawable = getCornetDrawable(false, backgroundCornerRadii);
-        Drawable selectedDrawable = getCornetDrawable(true, backgroundCornerRadii);
+        Drawable unselectedDrawable = getCornerDrawable(false, backgroundCornerRadii);
+        Drawable selectedDrawable = getCornerDrawable(true, backgroundCornerRadii);
     
         int[][] states = new int[2][];
         states[0] = new int[] {android.R.attr.state_selected};
@@ -106,7 +122,7 @@ public class ResHelper {
         cornerStateDrawable = bg;
     }
     
-    private Drawable getCornetDrawable(boolean selected, float[] cornerRadii) {
+    private Drawable getCornerDrawable(boolean selected, float[] cornerRadii) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(selected ? colorSelected : colorUnselected);
         drawable.setCornerRadii(cornerRadii);

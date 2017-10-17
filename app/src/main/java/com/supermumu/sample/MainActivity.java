@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.supermumu.ui.widget.BubbleView;
 import com.supermumu.ui.widget.SingleSelectBar;
 
 import java.util.ArrayList;
@@ -77,5 +78,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         selectBar.setTabs(list.subList(0, 5), 2);
+    
+        BubbleView bubbleView = findViewById(R.id.bubble_view1);
+        bubbleView.setBubbleCount(1);
+    
+        bubbleView = findViewById(R.id.bubble_view2);
+        bubbleView.setBubbleCount(100);
+    
+        bubbleView = findViewById(R.id.bubble_view3);
+        bubbleView.setBubbleCount(22, 10);
+        bubbleView.clearBubbleCount();
     }
 }

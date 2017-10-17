@@ -23,4 +23,18 @@
         layout="@layout/select_bar_layout_with_customize"
         android:id="@+id/sample_4"/>
 
+    <com.supermumu.ui.widget.BubbleView
+        android:id="@+id/bubble_view1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <com.supermumu.ui.widget.BubbleView
+        android:id="@+id/bubble_view2"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
+
+    <com.supermumu.ui.widget.BubbleView
+        android:id="@+id/bubble_view3"
+        android:layout_width="50dp"
+        android:layout_height="50dp"/>
 </LinearLayout>
