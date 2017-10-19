@@ -38,6 +38,8 @@ public class BubbleView extends View {
     
     private Paint debugLinePaint = new Paint();
     
+    private int margin2x;
+    
     private enum VIEW_EFFECT {ADD, UPDATE, REMOVE}
     
     public BubbleView(Context context) {
@@ -63,7 +65,8 @@ public class BubbleView extends View {
     
     private void init(Context context, AttributeSet attrs) {
         setWillNotDraw(false);
-        
+    
+        margin2x = getResources().getDimensionPixelSize(R.dimen.margin_2x);
         int colorSelected = Color.RED;
 //        int colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
         resHelper = new ResHelper(colorSelected, colorSelected, 0, 0);
@@ -72,27 +75,51 @@ public class BubbleView extends View {
         textPaint.setTextSize(40);
         textPaint.setTextAlign(Paint.Align.CENTER);
         fontMetrics = textPaint.getFontMetrics();
+//        Log.d(getClass().getSimpleName(), "Hsienn // EXACTLY: "+MeasureSpec.EXACTLY+", AT_MOST "+MeasureSpec.AT_MOST+", UNSPECIFIED "+MeasureSpec.UNSPECIFIED);
     
         debugLinePaint.setColor(Color.RED);
+    }
+    
+    private float getMeasureBubbleViewWidth() {
+        if (null != bubbleResultText) {
+            float width = (textPaint.measureText(bubbleResultText) + margin2x);
+            return Math.max(width, getMeasureBubbleViewHeight());
+        } else {
+            return getMeasureBubbleViewHeight();
+        }
+    }
+    
+    private float getMeasureBubbleViewHeight() {
+        return (fontMetrics.bottom - fontMetrics.top);
+    }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        Log.d(getClass().getSimpleName(), "Hsienn // id: "+getId()+", W "+MeasureSpec.getSize(widthMeasureSpec)+", "+MeasureSpec.getMode(widthMeasureSpec));
+//        Log.d(getClass().getSimpleName(), "Hsienn // id: "+getId()+", H "+MeasureSpec.getSize(heightMeasureSpec)+", "+MeasureSpec.getMode(widthMeasureSpec));
+        if (MeasureSpec.getSize(widthMeasureSpec) <= 0 || MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY) {
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec((int) getMeasureBubbleViewWidth(), MeasureSpec.EXACTLY);
+        }
+        if (MeasureSpec.getSize(heightMeasureSpec) <= 0 || MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.EXACTLY) {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec((int) getMeasureBubbleViewHeight(), MeasureSpec.EXACTLY);
+        }
+//        Log.w(getClass().getSimpleName(), "Hsienn // id: "+getId()+", W "+MeasureSpec.getSize(widthMeasureSpec)+", "+MeasureSpec.getMode(widthMeasureSpec));
+//        Log.w(getClass().getSimpleName(), "Hsienn // id: "+getId()+", H "+MeasureSpec.getSize(heightMeasureSpec)+", "+MeasureSpec.getMode(widthMeasureSpec));
+    
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
     
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     
-        if (null != bubbleResultText) {
-            drawCircleWithCount(canvas);
-        } else {
-            drawCircle(canvas);
-        }
+        drawCircleWithCount(canvas);
         
         canvas.drawLine(0, canvas.getHeight() / 2, canvas.getWidth(), canvas.getHeight() / 2, debugLinePaint);
         canvas.drawLine(canvas.getWidth()/2, 0, canvas.getWidth()/2, canvas.getHeight(), debugLinePaint);
     }
     
     private void drawCircleWithCount(Canvas canvas) {
-        float textHeight = (fontMetrics.bottom - fontMetrics.top);
-        float badgeTextWidth = textPaint.measureText(bubbleResultText);
 //        Log.e("A", "Hsien_ // size: " + textPaint.getTextSize());
 //        Log.e("A", "Hsien_ // top: " + fontMetrics.top);
 //        Log.e("A", "Hsien_ // ascent: " + textPaint.ascent() + ", " + fontMetrics.ascent);
@@ -103,42 +130,33 @@ public class BubbleView extends View {
     
         float viewX = canvas.getWidth() / 2F;
         float viewY = canvas.getHeight() / 2F;
-        float baseX = viewX;
-        float baseY = (viewY - ((textPaint.descent() + textPaint.ascent()) / 2F));
     
+        // measure and draw bubble
         if (isBubbleCountChanged) {
             isBubbleCountChanged = false;
     
             circlePath.reset();
             
-            float padding = getResources().getDimensionPixelSize(R.dimen.margin_2x);
-            float radiusY = (textHeight / 2F);
-            if (textHeight > (badgeTextWidth + padding)) {
-                circlePath.addCircle(viewX, viewY, radiusY, Path.Direction.CW);
+            float radiusY;
+            float radiusX;
+            if (null != bubbleResultText) {
+                radiusY = (getMeasureBubbleViewHeight() / 2F);
+                radiusX = (getMeasureBubbleViewWidth() / 2F);
             } else {
-                float radiusX = ((badgeTextWidth + padding) / 2F);
-                resHelper.setRoundRadius(radiusX);
-                rectF.set(viewX - radiusX, viewY + radiusY, viewX + radiusX, viewY - radiusY);
-                circlePath.addRoundRect(rectF, resHelper.getBackgroundCornerRadii(), Path.Direction.CCW);
+                radiusX = radiusY = (getMeasureBubbleViewHeight() / 4F);
             }
+            resHelper.setRoundRadius(radiusX);
+            rectF.set(viewX - radiusX, viewY + radiusY, viewX + radiusX, viewY - radiusY);
+            circlePath.addRoundRect(rectF, resHelper.getBackgroundCornerRadii(), Path.Direction.CCW);
         }
         resHelper.drawPath(canvas, circlePath);
     
-        canvas.drawText(bubbleResultText, baseX, baseY, textPaint);
-    }
-    
-    private void drawCircle(Canvas canvas) {
-        if (isBubbleCountChanged) {
-            isBubbleCountChanged = false;
-    
-            float viewX = canvas.getWidth() / 2F;
-            float viewY = canvas.getHeight() / 2F;
-            float textHeight = (fontMetrics.bottom - fontMetrics.top);
-            float radiusY = (textHeight / 4F);
-            circlePath.reset();
-            circlePath.addCircle(viewX, viewY, radiusY, Path.Direction.CW);
+        // draw text
+        if (null != bubbleResultText) {
+            float baseX = viewX;
+            float baseY = (viewY - ((textPaint.descent() + textPaint.ascent()) / 2F));
+            canvas.drawText(bubbleResultText, baseX, baseY, textPaint);
         }
-        resHelper.drawPath(canvas, circlePath);
     }
     
     public void setBubbleCount(int count) {
@@ -153,7 +171,8 @@ public class BubbleView extends View {
         }
         
         if (isBubbleCountChanged) {
-            postInvalidateOnAnimation();
+//            postInvalidateOnAnimation();
+            requestLayout();
         }
     }
     

@@ -23,18 +23,34 @@
         layout="@layout/select_bar_layout_with_customize"
         android:id="@+id/sample_4"/>
 
-    <com.supermumu.ui.widget.BubbleView
-        android:id="@+id/bubble_view1"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <com.supermumu.ui.widget.BubbleView
-        android:id="@+id/bubble_view2"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        <com.supermumu.ui.widget.BubbleView
+            android:id="@+id/bubble_view1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
 
-    <com.supermumu.ui.widget.BubbleView
-        android:id="@+id/bubble_view3"
-        android:layout_width="50dp"
-        android:layout_height="50dp"/>
+        <com.supermumu.ui.widget.BubbleView
+            android:id="@+id/bubble_view2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <com.supermumu.ui.widget.BubbleView
+            android:id="@+id/bubble_view3"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <com.supermumu.ui.widget.BubbleView
+            android:id="@+id/bubble_view4"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
+        <com.supermumu.ui.widget.BubbleView
+            android:id="@+id/bubble_view5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 </LinearLayout>

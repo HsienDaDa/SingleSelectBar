@@ -88,5 +88,8 @@ public class MainActivity extends AppCompatActivity {
         bubbleView = findViewById(R.id.bubble_view3);
         bubbleView.setBubbleCount(22, 10);
         bubbleView.clearBubbleCount();
+    
+        bubbleView = findViewById(R.id.bubble_view4);
+        bubbleView.setBubbleCount(100, 99);
     }
 }
