@@ -2,9 +2,11 @@ package com.supermumu.ui.helper;
 
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -20,6 +22,7 @@ import java.util.Arrays;
  */
 
 public class ResHelper {
+    private static final int PRESSED_ALPHA_VALUE = 51;
     
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
@@ -140,6 +143,14 @@ public class ResHelper {
     
     public ColorStateList getTextColorStateList() {
         return textColor;
+    }
+    
+    public Drawable getTextBgDrawable() {
+        ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
+        colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
+        StateListDrawable textBgDrawable = new StateListDrawable();
+        textBgDrawable.addState(new int[]{android.R.attr.state_pressed}, colorDrawablePressed);
+        return textBgDrawable;
     }
     
     public void drawRect(Canvas canvas, Rect rect) {

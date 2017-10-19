@@ -10,19 +10,23 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -37,12 +41,12 @@ import java.util.Locale;
  */
 
 public class SingleSelectBar extends LinearLayout {
-    private static final int ANIMATION_DURATION = 350;
+    private static final int ANIMATION_DURATION = 550;
     private static final float START_TRANSITION_THRESHOLD = 0.05F;
     private static final float END_TRANSITION_THRESHOLD = 0.95F;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
-    private Tab[] Tabs;
+    private Tab[] tabs;
     
     private int itemTextAppearance;
     
@@ -90,33 +94,32 @@ public class SingleSelectBar extends LinearLayout {
         initSelectBarThemeAttributes(context, attrs);
         updateBackground();
     
-        Tabs = new Tab[MAX_COUNT];
+        tabs = new Tab[MAX_COUNT];
         buildTabView(context);
     }
     
     private void buildTabView(Context context) {
-        final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
         ColorStateList colorStateList = resHelper.getTextColorStateList();
-        
         for (int i=0; i<MAX_COUNT; i++) {
             LayoutParams lp = new LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     1);
             
-            TextView view = new TextView(context);
+            TabView view = new TabView(context);
             view.setLayoutParams(lp);
-            TextViewCompat.setTextAppearance(view, itemTextAppearance);
-            view.setPadding(margin1X, margin1X, margin1X, margin1X);
-            view.setGravity(Gravity.CENTER);
-            view.setTextColor(colorStateList);
+            view.setTabTextAppearance(itemTextAppearance);
+            view.setTabTextColor(colorStateList);
             view.setOnClickListener(clickListener);
             addView(view);
             
-            Tab Tab = new Tab();
-            Tab.view = view;
-            Tab.setPosition(i);
-            Tabs[i] = Tab;
+            Tab tab = new Tab();
+            tab.view = view;
+            tab.setPosition(i);
+            tabs[i] = tab;
+            
+            Drawable bgPressedDrawable = resHelper.getTextBgDrawable();
+            view.setBackground(bgPressedDrawable);
         }
     }
     
@@ -202,12 +205,12 @@ public class SingleSelectBar extends LinearLayout {
         }
         dividerRect.right = 0;
         
-        for (Tab Tab : Tabs) {
-            if (Tab.getPosition() > 0 && Tab.getVisibility() == View.VISIBLE) {
+        for (Tab tab : tabs) {
+            if (tab.getPosition() > 0 && tab.getVisibility() == View.VISIBLE) {
                 resHelper.drawRect(canvas, dividerRect);
             }
     
-            dividerRect.left += Tab.view.getMeasuredWidth();
+            dividerRect.left += tab.view.getMeasuredWidth();
             dividerRect.right = dividerRect.left + dividerWidth;
         }
     }
@@ -217,16 +220,16 @@ public class SingleSelectBar extends LinearLayout {
             transitionX = 0F;
             transitionPos = currentPos;
             previousPos = currentPos;
-            drawSelectedTab(canvas, Tabs[currentPos]);
+            drawSelectedTab(canvas, tabs[currentPos]);
         } else {
             if (animatorValue < START_TRANSITION_THRESHOLD) {
                 transitionPos = previousPos;
             } else if (animatorValue > END_TRANSITION_THRESHOLD) {
                 transitionPos = currentPos;
             }
-            float bothViewsDistance = (Tabs[currentPos].view.getX() - Tabs[previousPos].view.getX());
+            float bothViewsDistance = (tabs[currentPos].view.getX() - tabs[previousPos].view.getX());
             transitionX = (bothViewsDistance * animatorValue);
-            drawSelectedTab(canvas, Tabs[previousPos]);
+            drawSelectedTab(canvas, tabs[previousPos]);
         }
     }
     private void drawSelectedTab(Canvas canvas, Tab Tab) {
@@ -237,7 +240,7 @@ public class SingleSelectBar extends LinearLayout {
         final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
     
         // change selected/unselected state in scroll transition
-        for (Tab selectableTab : Tabs) {
+        for (Tab selectableTab : tabs) {
             int selectedHalfPos = (int) (selectableTab.view.getLeft() + (selectableTab.view.getMeasuredWidth() * 0.5F));
             if (right >= selectedHalfPos && left <= selectedHalfPos) {
                 selectableTab.view.setSelected(true);
@@ -287,11 +290,11 @@ public class SingleSelectBar extends LinearLayout {
     public void setTabs(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
         visibleButtonCount = checkButtonCount(list.size());
         
-        for (Tab Tab : Tabs) {
-            if (Tab.getPosition() < visibleButtonCount) {
-                Tab.setText(list.get(Tab.getPosition()));
+        for (Tab tab : tabs) {
+            if (tab.getPosition() < visibleButtonCount) {
+                tab.setText(list.get(tab.getPosition()));
             } else {
-                Tab.setText(null);
+                tab.setText(null);
             }
         }
     
@@ -329,9 +332,9 @@ public class SingleSelectBar extends LinearLayout {
         public void onClick(View view) {
             previousPos = currentPos;
     
-            for (Tab Tab : Tabs) {
-                if (Tab.view == view) {
-                    currentPos = Tab.getPosition();
+            for (Tab tab : tabs) {
+                if (tab.view == view) {
+                    currentPos = tab.getPosition();
             
                     ensureScrollAnimator();
                     if (scrollAnimator.isRunning()) {
@@ -356,7 +359,7 @@ public class SingleSelectBar extends LinearLayout {
         if (null == scrollAnimator) {
             scrollAnimator = ValueAnimator.ofFloat(0, 1);
             scrollAnimator.setDuration(ANIMATION_DURATION);
-            scrollAnimator.setInterpolator(new DecelerateInterpolator());
+            scrollAnimator.setInterpolator(new AnticipateOvershootInterpolator(0.6F));
             scrollAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
@@ -368,13 +371,13 @@ public class SingleSelectBar extends LinearLayout {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    Tabs[currentPos].view.setSelected(true);
+                    tabs[currentPos].view.setSelected(true);
                 }
         
                 @Override
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
-                    Tabs[previousPos].view.setSelected(false);
+                    tabs[previousPos].view.setSelected(false);
                 }
             });
         }
@@ -423,7 +426,7 @@ public class SingleSelectBar extends LinearLayout {
 //            public void onAnimationEnd(Animator animation) {
 //                super.onAnimationEnd(animation);
 //                Log.d("S", "Hsien_ // [onAnimationEnd] ");
-//                Tabs[currentPos].view.setSelected(true);
+//                tabs[currentPos].view.setSelected(true);
 //            }
 //
 //            @Override
@@ -436,7 +439,7 @@ public class SingleSelectBar extends LinearLayout {
 //    }
     
     /**
-     * Set a text appearance for all Tabs.
+     * Set a text appearance for all tabs.
      *
      * @param textAppearance The style of tab text.
      */
@@ -448,8 +451,8 @@ public class SingleSelectBar extends LinearLayout {
             resHelper.setColorSelected(colorSelected);
         }
         
-        for (Tab Tab : Tabs) {
-            TextViewCompat.setTextAppearance(Tab.view, textAppearance);
+        for (Tab tab : tabs) {
+            tab.view.setTabTextAppearance(textAppearance);
         }
     }
     
@@ -506,9 +509,9 @@ public class SingleSelectBar extends LinearLayout {
             position = 0;
         }
         
-        Tab Tab = Tabs[position];
-        if (Tab.getVisibility() == View.VISIBLE) {
-            Tab.view.callOnClick();
+        Tab tab = tabs[position];
+        if (tab.getVisibility() == View.VISIBLE) {
+            tab.view.callOnClick();
         }
     }
     
@@ -527,13 +530,86 @@ public class SingleSelectBar extends LinearLayout {
     
     private void invalidTextColor() {
         ColorStateList colorStateList = resHelper.getTextColorStateList();
-        for (Tab Tab : Tabs) {
-            Tab.view.setTextColor(colorStateList);
+        for (Tab tab : tabs) {
+            tab.view.setTabTextColor(colorStateList);
+        }
+    }
+    
+    private final class TabView extends ConstraintLayout {
+    
+        private TextView textView;
+        private BubbleView bubbleView;
+        
+        public TabView(Context context) {
+            super(context);
+            init(context);
+        }
+        
+        private void init(Context context) {
+            initViews(context);
+            initConstraintSet(context);
+        }
+        
+        private void initViews(Context context) {
+            final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_2x);
+            final int margin3X = context.getResources().getDimensionPixelSize(R.dimen.margin_3x);
+            
+            textView = new TextView(context);
+            textView.setId(R.id.tab_text);
+            textView.setGravity(Gravity.CENTER);
+            textView.setPadding(margin3X, margin1X, margin3X, margin1X);
+            textView.setMaxLines(1);
+            textView.setEllipsize(TextUtils.TruncateAt.END);
+            addView(textView);
+    
+            bubbleView = new BubbleView(context);
+            bubbleView.setId(R.id.tab_bubble);
+            bubbleView.setBubbleCount(11);
+            addView(bubbleView);
+            
+            ViewGroup.LayoutParams lp = getLayoutParams();
+            if (null == lp) {
+                lp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        1);
+                setLayoutParams(lp);
+            }
+        }
+    
+        private void initConstraintSet(Context context) {
+            ConstraintSet set = new ConstraintSet();
+    
+            int viewId = textView.getId();
+            set.constrainWidth(viewId, ConstraintSet.WRAP_CONTENT);
+            set.constrainHeight(viewId, ConstraintSet.WRAP_CONTENT);
+            set.connect(viewId, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
+            set.connect(viewId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+            set.connect(viewId, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
+            set.connect(viewId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+            
+            viewId = bubbleView.getId();
+            set.connect(viewId, ConstraintSet.TOP, R.id.tab_text, ConstraintSet.TOP);
+            set.connect(viewId, ConstraintSet.RIGHT, R.id.tab_text, ConstraintSet.RIGHT);
+            
+            set.applyTo(this);
+        }
+        
+        public void setTabText(CharSequence text) {
+            textView.setText(text);
+        }
+        
+        public void setTabTextColor(ColorStateList colorStateList) {
+            textView.setTextColor(colorStateList);
+        }
+        
+        public void setTabTextAppearance(@StyleRes int textAppearance) {
+            TextViewCompat.setTextAppearance(textView, textAppearance);
         }
     }
     
     private final class Tab {
-        TextView view;
+        TabView view;
         
         private int position;
         private CharSequence text;
@@ -555,7 +631,7 @@ public class SingleSelectBar extends LinearLayout {
             this.text = text;
             updateView();
         }
-    
+        
         public int getVisibility() {
             return visibility;
         }
@@ -566,7 +642,7 @@ public class SingleSelectBar extends LinearLayout {
             } else {
                 visibility = View.VISIBLE;
             }
-            view.setText(text);
+            view.setTabText(text);
             
             if (view.getVisibility() != visibility) {
                 view.setVisibility(visibility);
