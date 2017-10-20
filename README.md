@@ -1,20 +1,20 @@
 SingleSelectBoard
 =====
-[![Build Status](https://travis-ci.org/com.supermumu/ui.svg?branch=master)](https://travis-ci.org/com.supermumu/ui)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui)
 [![Github file size](https://img.shields.io/github/size/webcaetano/craft/build/phaser-craft.min.js.svg)]()
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
+[![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/supermumu/SingleSelectBoard/blob/master/LICENSE.txt)
 
-### Next release v1.0.3 preview:
+### New release v1.0.4 preview:
 
-<img src="https://user-images.githubusercontent.com/32517342/31527961-235fc886-b003-11e7-8b9a-4fde35975dfc.gif" width="30%" />
+<img src="https://user-images.githubusercontent.com/32517342/31831667-ce90f4ca-b5f6-11e7-97c7-12fb0d11f9b5.gif" width="30%" />
 
 SuperMuMu's ui is a Java library with custom view components.
 
 ### SuperMuMu Goals
   * Provide models to convenient/powerful and easy to integrate on your code.
 
-### Download and Maven
+### Gradle
   * To use SuperMuMu-UI in Android
 ```
 dependencies {
@@ -27,21 +27,22 @@ dependencies {
 
 In Java:
 ```java
-SingleSelectBoard board = new SingleSelectBoard(context);
-board.setSelectedColor(Color.RED);
-board.setUnselectedColor(Color.BLACK);
-board.setTextAlignment(R.style.text_appearance);
-board.setBoardStrokeWidth(4);
+SingleSelectBar tabBar = new SingleSelectBar(context);
+tabBar.setSelectedColor(Color.RED);
+tabBar.setUnselectedColor(Color.BLACK);
+tabBar.setTabTextAppearance(R.style.text_appearance);
+tabBar.setTabStrokeWidth(4);
 ```
 In Xml:
 ```xml
 <com.supermumu.ui.widget.SingleSelectBoard
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:boardColorSelected="@color/colorPrimary"
-        app:boardColorUnselected="@android:color/white"
-        app:boardTextAppearance="@style/TextAppearance.CustomText"
-        app:boardStrokeWidth="3dp"/>
+        app:tabColorSelected="@color/colorPrimary"
+        app:tabColorUnselected="@android:color/white"
+        app:tabTextAppearance="@style/TextAppearance.CustomText"
+        app:tabStrokeWidth="3dp"
+        app:tabPressedEffect="true"/>
 ```
 
 **Sets display list of CharSequence(max=5)**
