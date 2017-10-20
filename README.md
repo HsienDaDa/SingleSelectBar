@@ -1,6 +1,8 @@
 SingleSelectBar
 =====
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.supermumu/ui)
+[![platform](https://img.shields.io/badge/platform-Android-yellow.svg)](https://www.android.com)
+[![API](https://img.shields.io/badge/API-16%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=16)
 [![Github file size](https://img.shields.io/github/size/webcaetano/craft/build/phaser-craft.min.js.svg)]()
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 [![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/supermumu/SingleSelectBar/blob/master/LICENSE.txt)
