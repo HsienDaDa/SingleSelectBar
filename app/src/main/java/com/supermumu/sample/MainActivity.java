@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         sampleView = findViewById(R.id.sample_3);
         selectBar = sampleView.findViewById(R.id.single_select_bar);
         selectBar.setSelectedColor(Color.RED);
-        selectBar.setUnselectedColor(Color.BLACK);
+        selectBar.setUnselectedColor(Color.CYAN);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
         title.setText("Four items: \n - customize selected/unselected colors ");

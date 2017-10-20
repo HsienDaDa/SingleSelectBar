@@ -26,15 +26,15 @@ import java.util.Arrays;
  */
 
 public class ResHelper {
+    private static final int RIPPLE_ALPHA_VALUE = 128;
     private static final int PRESSED_ALPHA_VALUE = 51;
     
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
-    private float roundRadius;
     private int strokeWidth;
     
-    private float[] backgroundCornerRadii = new float[8];
+    private float[] fullCornerRadii = new float[8];
     private float[] startCornerRadii = new float[8];
     private float[] centerCornerRadii = new float[8];
     private float[] endCornerRadii = new float[8];
@@ -47,7 +47,6 @@ public class ResHelper {
     public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
-        this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
     
         setRoundRadius(roundRadius);
@@ -55,7 +54,7 @@ public class ResHelper {
     }
     
     public void setRoundRadius(float roundRadius) {
-        Arrays.fill(backgroundCornerRadii, roundRadius);
+        Arrays.fill(fullCornerRadii, roundRadius);
         
         Arrays.fill(startCornerRadii, 0, 2, roundRadius);
         Arrays.fill(startCornerRadii, 6, 8, roundRadius);
@@ -110,12 +109,12 @@ public class ResHelper {
         } else if (CORNER_POSITION.END == cornerPosition) {
             return endCornerRadii;
         } else {
-            return backgroundCornerRadii;
+            return fullCornerRadii;
         }
     }
     
     private void updateCornerStateDrawable() {
-        cornerStateDrawable = getCornerDrawable(false, backgroundCornerRadii);
+        cornerStateDrawable = getCornerDrawable(false, fullCornerRadii);
     }
     
     private Drawable getCornerDrawable(boolean selected, float[] cornerRadii) {
@@ -138,22 +137,25 @@ public class ResHelper {
         return textColor;
     }
     
-    public Drawable getTextBgDrawable(CORNER_POSITION position) {
+    public Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
         Drawable backgroundDrawable;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            int[] colors = new int[] {Color.argb(PRESSED_ALPHA_VALUE, 0, 0, 0)};
+            int[] colors = new int[] {Color.BLACK};
             int[][] states = new int[1][];
-            states[0] = new int[] {android.R.attr.state_pressed};
+            states[0] = new int[] {android.R.attr.state_enabled, android.R.attr.state_pressed};
             ColorStateList colorStateList = new ColorStateList(states, colors);
-
+       
             Drawable maskDrawable;
-            if (CORNER_POSITION.CENTER == position) {
+            if (CORNER_POSITION.CENTER == cornerPosition) {
                 maskDrawable = new ShapeDrawable(new CornerShapeDrawable(centerCornerRadii));
-            } else if (CORNER_POSITION.START == position) {
+            } else if (CORNER_POSITION.START == cornerPosition) {
                 maskDrawable = new ShapeDrawable(new CornerShapeDrawable(startCornerRadii));
-            } else {
+            } else if (CORNER_POSITION.END == cornerPosition) {
                 maskDrawable = new ShapeDrawable(new CornerShapeDrawable(endCornerRadii));
+            } else {
+                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(fullCornerRadii));
             }
+            maskDrawable.setAlpha(RIPPLE_ALPHA_VALUE);
             
             backgroundDrawable = new RippleDrawable(colorStateList, null, maskDrawable);
         } else {
