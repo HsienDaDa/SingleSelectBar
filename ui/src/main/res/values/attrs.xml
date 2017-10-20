@@ -5,5 +5,6 @@
         <attr name="tabColorUnselected" format="color"/>
         <attr name="tabTextAppearance" format="integer"/>
         <attr name="tabStrokeWidth" format="dimension"/>
+        <attr name="tabPressedEffect" format="boolean"/>
     </declare-styleable>
 </resources>

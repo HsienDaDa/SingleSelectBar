@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setUnselectedColor(Color.CYAN);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
-        title.setText("Four items: \n - customize selected/unselected colors ");
+        title.setText("Four items: \n - customize selected/unselected colors");
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         selectBar = sampleView.findViewById(R.id.single_select_bar);
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
-        title.setText("Five items:\n - customize height\n - customize stroke width");
+        title.setText("Five items:\n - customize height\n - customize stroke width\n - disable pressed effect ");
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {

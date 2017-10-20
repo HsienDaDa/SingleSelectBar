@@ -22,7 +22,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -148,10 +147,13 @@ public class SingleSelectBar extends LinearLayout {
         } else {
             dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width);
         }
+        
+        boolean tabPressedEffect = a.getBoolean(R.styleable.SingleSelectBar_tabPressedEffect, true);
+        
         a.recycle();
     
         int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius);
-        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth);
+        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, tabPressedEffect);
     }
     
     private int getSelectedColorFromStyle(Context context) {
@@ -177,20 +179,6 @@ public class SingleSelectBar extends LinearLayout {
     
         drawDividers(canvas);
         dispatchDrawSelectedTabs(canvas);
-    
-//        mDstPath.reset();
-//        mDstPath.lineTo(0, 0);
-//        float stopD = animatorValue * mLength;
-//        float startD = 0;
-//
-//        //获取当前进度的路径，同时赋值给传入的mDstPath
-//        startD = (float) (stopD - ((0.5 - Math.abs(animatorValue - 0.5)) * mLength));
-//        mPathMeasure.getSegment(startD, stopD, mDstPath, true);
-//
-//        canvas.save();
-//        canvas.translate(30+transitionX, 30);
-//        canvas.drawPath(mDstPath, mPaint);
-//        canvas.restore();
     }
     
     private void drawDividers(Canvas canvas) {
@@ -216,7 +204,6 @@ public class SingleSelectBar extends LinearLayout {
         if (animatorValue >= 1F) {
             transitionX = 0F;
             transitionPos = currentPos;
-            previousPos = currentPos;
             drawSelectedTab(canvas, tabs[currentPos]);
         } else {
             if (animatorValue < START_TRANSITION_THRESHOLD) {
@@ -398,61 +385,6 @@ public class SingleSelectBar extends LinearLayout {
         }
     }
     
-//    Path mCirclePath;
-//    Paint mPaint = new Paint();
-//    Path mDstPath;
-//    PathMeasure mPathMeasure;
-//    float mLength;
-//    float animatorValue;
-//    ValueAnimator mValueAnimator;
-//    private void test() {
-//        mCirclePath = new Path();
-//        //路径绘制每段截取出来的路径
-//        mDstPath = new Path();
-//        mPaint.setColor(Color.RED);
-//        mCirclePath.addCircle(20, 20, 40, Path.Direction.CW);
-//
-//        //路径测量类
-//        mPathMeasure = new PathMeasure();
-//        //测量路径
-//        mPathMeasure.setPath(mCirclePath, false);
-//
-//        //获取被测量路径的总长度
-//        mLength = mPathMeasure.getLength();
-//
-//        if (null != mValueAnimator && mValueAnimator.isRunning()) {
-//            mValueAnimator.end();
-//        }
-//        mValueAnimator = ValueAnimator.ofFloat(0, 1);
-//        mValueAnimator.setDuration(ANIMATION_DURATION);
-////        mValueAnimator.setRepeatCount(ValueAnimator.INFINITE);
-//        mValueAnimator.setInterpolator(new DecelerateInterpolator());
-//        mValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator animation) {
-//                //获取从0-1的变化值
-//                animatorValue = (float) animation.getAnimatedValue();
-//                Log.d("S", "Hsien_ // [onAnimationUpdate] "+animatorValue);
-//                invalidate();
-//            }
-//        });
-//        mValueAnimator.addListener(new AnimatorListenerAdapter() {
-//            @Override
-//            public void onAnimationEnd(Animator animation) {
-//                super.onAnimationEnd(animation);
-//                Log.d("S", "Hsien_ // [onAnimationEnd] ");
-//                tabs[currentPos].view.setSelected(true);
-//            }
-//
-//            @Override
-//            public void onAnimationStart(Animator animation) {
-//                super.onAnimationStart(animation);
-//                Log.d("S", "Hsien_ // [onAnimationStart] ");
-//            }
-//        });
-//        mValueAnimator.start();
-//    }
-    
     /**
      * Set a text appearance for all tabs.
      *
@@ -609,7 +541,7 @@ public class SingleSelectBar extends LinearLayout {
             
             set.applyTo(this);
         }
-        
+    
         public void setTabText(CharSequence text) {
             textView.setText(text);
         }

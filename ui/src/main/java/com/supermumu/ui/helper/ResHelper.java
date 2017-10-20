@@ -12,8 +12,10 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
+import android.support.annotation.RequiresApi;
 
 import com.supermumu.ui.graphics.drawable.CornerShapeDrawable;
 
@@ -33,6 +35,7 @@ public class ResHelper {
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private int strokeWidth;
+    private boolean showPressedEffect;
     
     private float[] fullCornerRadii = new float[8];
     private float[] startCornerRadii = new float[8];
@@ -44,10 +47,12 @@ public class ResHelper {
     
     public enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
     
-    public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
+    public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius,
+                     int strokeWidth, boolean showPressedEffect) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
         this.strokeWidth = strokeWidth;
+        this.showPressedEffect = showPressedEffect;
     
         setRoundRadius(roundRadius);
         updateCornerStateDrawable();
@@ -138,34 +143,45 @@ public class ResHelper {
     }
     
     public Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
-        Drawable backgroundDrawable;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            int[] colors = new int[] {Color.BLACK};
-            int[][] states = new int[1][];
-            states[0] = new int[] {android.R.attr.state_enabled, android.R.attr.state_pressed};
-            ColorStateList colorStateList = new ColorStateList(states, colors);
-       
-            Drawable maskDrawable;
-            if (CORNER_POSITION.CENTER == cornerPosition) {
-                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(centerCornerRadii));
-            } else if (CORNER_POSITION.START == cornerPosition) {
-                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(startCornerRadii));
-            } else if (CORNER_POSITION.END == cornerPosition) {
-                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(endCornerRadii));
+        Drawable backgroundDrawable = null;
+        if (showPressedEffect) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                backgroundDrawable = getRippleEffect(cornerPosition);
             } else {
-                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(fullCornerRadii));
+                backgroundDrawable = getPressedEffectBeforeLollipop();
             }
-            maskDrawable.setAlpha(RIPPLE_ALPHA_VALUE);
-            
-            backgroundDrawable = new RippleDrawable(colorStateList, null, maskDrawable);
-        } else {
-            ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
-            colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
-            StateListDrawable textBgDrawable = new StateListDrawable();
-            textBgDrawable.addState(new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed}, colorDrawablePressed);
-            backgroundDrawable = textBgDrawable;
         }
         return backgroundDrawable;
+    }
+    
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private Drawable getRippleEffect(CORNER_POSITION cornerPosition) {
+        int[] colors = new int[] {Color.BLACK};
+        int[][] states = new int[1][];
+        states[0] = new int[] {android.R.attr.state_enabled, android.R.attr.state_pressed};
+        ColorStateList colorStateList = new ColorStateList(states, colors);
+    
+        Drawable maskDrawable;
+        if (CORNER_POSITION.CENTER == cornerPosition) {
+            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(centerCornerRadii));
+        } else if (CORNER_POSITION.START == cornerPosition) {
+            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(startCornerRadii));
+        } else if (CORNER_POSITION.END == cornerPosition) {
+            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(endCornerRadii));
+        } else {
+            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(fullCornerRadii));
+        }
+        maskDrawable.setAlpha(RIPPLE_ALPHA_VALUE);
+    
+        return new RippleDrawable(colorStateList, null, maskDrawable);
+    }
+    
+    private Drawable getPressedEffectBeforeLollipop() {
+        ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
+        colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
+        StateListDrawable textBgDrawable = new StateListDrawable();
+        textBgDrawable.addState(new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed}, colorDrawablePressed);
+        return textBgDrawable;
     }
     
     public void drawRect(Canvas canvas, Rect rect) {

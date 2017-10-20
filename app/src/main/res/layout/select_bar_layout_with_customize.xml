@@ -37,6 +37,7 @@
         app:tabColorSelected="@color/colorPrimary"
         app:tabColorUnselected="@android:color/white"
         app:tabStrokeWidth="3dp"
+        app:tabPressedEffect="false"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
