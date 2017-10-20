@@ -26,7 +26,7 @@ import java.util.Arrays;
  */
 
 public class ResHelper {
-    private static final int RIPPLE_ALPHA_VALUE = 128;
+    private static final int RIPPLE_ALPHA_VALUE = 77;
     private static final int PRESSED_ALPHA_VALUE = 51;
     
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
