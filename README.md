@@ -18,7 +18,7 @@ SuperMuMu's ui is a Java library with custom view components.
   * To use SuperMuMu-UI in Android
 ```
 dependencies {
-    compile 'com.supermumu:ui:1.0.3'
+    compile 'com.supermumu:ui:1.0.4'
 }
 ```
 
