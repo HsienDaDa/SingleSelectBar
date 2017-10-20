@@ -9,9 +9,13 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
+
+import com.supermumu.ui.graphics.drawable.CornerShapeDrawable;
 
 import java.util.Arrays;
 
@@ -37,6 +41,8 @@ public class ResHelper {
     
     private ColorStateList textColor;
     private Drawable cornerStateDrawable;
+    
+    public enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
     
     public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius, int strokeWidth) {
         setColorSelected(colorSelected);
@@ -96,33 +102,20 @@ public class ResHelper {
         return cornerStateDrawable;
     }
     
-    public float[] getStartCornerRadii() {
-        return startCornerRadii;
-    }
-    
-    public float[] getCenterCornerRadii() {
-        return centerCornerRadii;
-    }
-    
-    public float[] getEndCornerRadii() {
-        return endCornerRadii;
-    }
-    
-    public float[] getBackgroundCornerRadii() {
-        return backgroundCornerRadii;
+    public float[] getCornerRadii(CORNER_POSITION cornerPosition) {
+        if (CORNER_POSITION.CENTER == cornerPosition) {
+            return centerCornerRadii;
+        } else if (CORNER_POSITION.START == cornerPosition) {
+            return startCornerRadii;
+        } else if (CORNER_POSITION.END == cornerPosition) {
+            return endCornerRadii;
+        } else {
+            return backgroundCornerRadii;
+        }
     }
     
     private void updateCornerStateDrawable() {
-        Drawable unselectedDrawable = getCornerDrawable(false, backgroundCornerRadii);
-        Drawable selectedDrawable = getCornerDrawable(true, backgroundCornerRadii);
-    
-        int[][] states = new int[2][];
-        states[0] = new int[] {android.R.attr.state_selected};
-        states[1] = new int[] {};
-        StateListDrawable bg = new StateListDrawable();
-        bg.addState(states[0], selectedDrawable);
-        bg.addState(states[1], unselectedDrawable);
-        cornerStateDrawable = bg;
+        cornerStateDrawable = getCornerDrawable(false, backgroundCornerRadii);
     }
     
     private Drawable getCornerDrawable(boolean selected, float[] cornerRadii) {
@@ -145,12 +138,32 @@ public class ResHelper {
         return textColor;
     }
     
-    public Drawable getTextBgDrawable() {
-        ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
-        colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
-        StateListDrawable textBgDrawable = new StateListDrawable();
-        textBgDrawable.addState(new int[]{android.R.attr.state_pressed}, colorDrawablePressed);
-        return textBgDrawable;
+    public Drawable getTextBgDrawable(CORNER_POSITION position) {
+        Drawable backgroundDrawable;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            int[] colors = new int[] {Color.argb(PRESSED_ALPHA_VALUE, 0, 0, 0)};
+            int[][] states = new int[1][];
+            states[0] = new int[] {android.R.attr.state_pressed};
+            ColorStateList colorStateList = new ColorStateList(states, colors);
+
+            Drawable maskDrawable;
+            if (CORNER_POSITION.CENTER == position) {
+                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(centerCornerRadii));
+            } else if (CORNER_POSITION.START == position) {
+                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(startCornerRadii));
+            } else {
+                maskDrawable = new ShapeDrawable(new CornerShapeDrawable(endCornerRadii));
+            }
+            
+            backgroundDrawable = new RippleDrawable(colorStateList, null, maskDrawable);
+        } else {
+            ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
+            colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
+            StateListDrawable textBgDrawable = new StateListDrawable();
+            textBgDrawable.addState(new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed}, colorDrawablePressed);
+            backgroundDrawable = textBgDrawable;
+        }
+        return backgroundDrawable;
     }
     
     public void drawRect(Canvas canvas, Rect rect) {

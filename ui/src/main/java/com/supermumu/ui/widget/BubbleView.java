@@ -147,7 +147,7 @@ public class BubbleView extends View {
             }
             resHelper.setRoundRadius(radiusX);
             rectF.set(viewX - radiusX, viewY + radiusY, viewX + radiusX, viewY - radiusY);
-            circlePath.addRoundRect(rectF, resHelper.getBackgroundCornerRadii(), Path.Direction.CCW);
+            circlePath.addRoundRect(rectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.ALL), Path.Direction.CCW);
         }
         resHelper.drawPath(canvas, circlePath);
     

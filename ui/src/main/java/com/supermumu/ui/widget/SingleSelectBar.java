@@ -117,9 +117,6 @@ public class SingleSelectBar extends LinearLayout {
             tab.view = view;
             tab.setPosition(i);
             tabs[i] = tab;
-            
-            Drawable bgPressedDrawable = resHelper.getTextBgDrawable();
-            view.setBackground(bgPressedDrawable);
         }
     }
     
@@ -232,6 +229,7 @@ public class SingleSelectBar extends LinearLayout {
             drawSelectedTab(canvas, tabs[previousPos]);
         }
     }
+    
     private void drawSelectedTab(Canvas canvas, Tab Tab) {
         final float left = Tab.view.getX() + transitionX;
         final float top = 0;
@@ -253,11 +251,11 @@ public class SingleSelectBar extends LinearLayout {
         selectedPath.reset();
         if (isStartEndAnimatorValue && (transitionPos == 0)) {
             selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getStartCornerRadii(), Path.Direction.CCW);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.START), Path.Direction.CCW);
             resHelper.drawPath(canvas, selectedPath);
         } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
             selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getEndCornerRadii(), Path.Direction.CCW);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.END), Path.Direction.CCW);
             resHelper.drawPath(canvas, selectedPath);
         } else {
             selectedPath.moveTo(left, top);
@@ -291,7 +289,16 @@ public class SingleSelectBar extends LinearLayout {
         visibleButtonCount = checkButtonCount(list.size());
         
         for (Tab tab : tabs) {
-            if (tab.getPosition() < visibleButtonCount) {
+            int tabPos = tab.getPosition();
+            if (tabPos < visibleButtonCount) {
+                if (tabPos == 0) {
+                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.START);
+                } else if (tabPos == (visibleButtonCount - 1)) {
+                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.END);
+                } else {
+                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.CENTER);
+                }
+                
                 tab.setText(list.get(tab.getPosition()));
             } else {
                 tab.setText(null);
@@ -299,6 +306,14 @@ public class SingleSelectBar extends LinearLayout {
         }
     
         setSelector(selectorPos);
+    }
+    
+    private void updateTabTextBackground(Tab tab, ResHelper.CORNER_POSITION position) {
+        if (tab.getCornerPosition() != position) {
+            Drawable backgroundDrawable = resHelper.getTextBgDrawable(position);
+            tab.view.setBackground(backgroundDrawable);
+            tab.setCornerPosition(position);
+        }
     }
     
     /**
@@ -614,6 +629,7 @@ public class SingleSelectBar extends LinearLayout {
         private int position;
         private CharSequence text;
         private int visibility = View.VISIBLE;
+        private ResHelper.CORNER_POSITION cornerPosition = ResHelper.CORNER_POSITION.UNSET;
     
         public int getPosition() {
             return position;
@@ -635,7 +651,15 @@ public class SingleSelectBar extends LinearLayout {
         public int getVisibility() {
             return visibility;
         }
-        
+    
+        public ResHelper.CORNER_POSITION getCornerPosition() {
+            return cornerPosition;
+        }
+    
+        public void setCornerPosition(ResHelper.CORNER_POSITION cornerPosition) {
+            this.cornerPosition = cornerPosition;
+        }
+    
         private void updateView() {
             if (TextUtils.isEmpty(text)) {
                 visibility = View.GONE;
