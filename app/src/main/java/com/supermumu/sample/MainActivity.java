@@ -79,17 +79,17 @@ public class MainActivity extends AppCompatActivity {
         });
         selectBar.setTabs(list.subList(0, 5), 2);
     
-        BubbleView bubbleView = findViewById(R.id.bubble_view1);
-        bubbleView.setBubbleCount(1);
-    
-        bubbleView = findViewById(R.id.bubble_view2);
-        bubbleView.setBubbleCount(100);
-    
-        bubbleView = findViewById(R.id.bubble_view3);
-        bubbleView.setBubbleCount(22, 10);
-        bubbleView.clearBubbleCount();
-    
-        bubbleView = findViewById(R.id.bubble_view4);
-        bubbleView.setBubbleCount(100, 99);
+//        BubbleView bubbleView = findViewById(R.id.bubble_view1);
+//        bubbleView.setBubbleCount(1);
+//
+//        bubbleView = findViewById(R.id.bubble_view2);
+//        bubbleView.setBubbleCount(100);
+//
+//        bubbleView = findViewById(R.id.bubble_view3);
+//        bubbleView.setBubbleCount(22, 10);
+//        bubbleView.clearBubbleCount();
+//
+//        bubbleView = findViewById(R.id.bubble_view4);
+//        bubbleView.setBubbleCount(100, 99);
     }
 }

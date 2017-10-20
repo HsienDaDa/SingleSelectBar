@@ -485,7 +485,7 @@ public class SingleSelectBar extends LinearLayout {
     private final class TabView extends ConstraintLayout {
     
         private TextView textView;
-        private BubbleView bubbleView;
+//        private BubbleView bubbleView;
         
         public TabView(Context context) {
             super(context);
@@ -509,10 +509,10 @@ public class SingleSelectBar extends LinearLayout {
             textView.setEllipsize(TextUtils.TruncateAt.END);
             addView(textView);
     
-            bubbleView = new BubbleView(context);
-            bubbleView.setId(R.id.tab_bubble);
-            bubbleView.setBubbleCount(11);
-            addView(bubbleView);
+//            bubbleView = new BubbleView(context);
+//            bubbleView.setId(R.id.tab_bubble);
+//            bubbleView.setBubbleCount(11);
+//            addView(bubbleView);
             
             ViewGroup.LayoutParams lp = getLayoutParams();
             if (null == lp) {
@@ -535,9 +535,9 @@ public class SingleSelectBar extends LinearLayout {
             set.connect(viewId, ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
             set.connect(viewId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
             
-            viewId = bubbleView.getId();
-            set.connect(viewId, ConstraintSet.TOP, R.id.tab_text, ConstraintSet.TOP);
-            set.connect(viewId, ConstraintSet.RIGHT, R.id.tab_text, ConstraintSet.RIGHT);
+//            viewId = bubbleView.getId();
+//            set.connect(viewId, ConstraintSet.TOP, R.id.tab_text, ConstraintSet.TOP);
+//            set.connect(viewId, ConstraintSet.RIGHT, R.id.tab_text, ConstraintSet.RIGHT);
             
             set.applyTo(this);
         }
