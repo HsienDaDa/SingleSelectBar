@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SingleSelectBoard">
-        <attr name="boardColorSelected" format="color"/>
-        <attr name="boardColorUnselected" format="color"/>
-        <attr name="boardTextAppearance" format="integer"/>
-        <attr name="boardStrokeWidth" format="dimension"/>
+    <declare-styleable name="SingleSelectBar">
+        <attr name="tabColorSelected" format="color"/>
+        <attr name="tabColorUnselected" format="color"/>
+        <attr name="tabTextAppearance" format="integer"/>
+        <attr name="tabStrokeWidth" format="dimension"/>
+        <attr name="tabPressedEffect" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -5,7 +5,7 @@ SingleSelectBoard
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 [![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/supermumu/SingleSelectBoard/blob/master/LICENSE.txt)
 
-### New release v1.0.4 preview:
+### New release v1.0.4:
 
 <img src="https://user-images.githubusercontent.com/32517342/31831667-ce90f4ca-b5f6-11e7-97c7-12fb0d11f9b5.gif" width="30%" />
 
