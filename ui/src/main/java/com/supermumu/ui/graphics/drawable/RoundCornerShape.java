@@ -10,17 +10,17 @@ import android.graphics.drawable.shapes.RectShape;
  * Created by hsienhsu on 2017/10/20.
  */
 
-public class CornerShapeDrawable extends RectShape {
+public class RoundCornerShape extends RectShape {
     private RectF paddingRect;
     private Path path = new Path();
-    private float[] cornetRadii;
+    private float[] cornerRadii;
     
-    public CornerShapeDrawable(float[] cornetRadii) {
-        this(cornetRadii, null);
+    public RoundCornerShape(float[] cornerRadii) {
+        this(cornerRadii, null);
     }
     
-    public CornerShapeDrawable(float[] cornetRadii, RectF paddingRect) {
-        this.cornetRadii = cornetRadii;
+    public RoundCornerShape(float[] cornerRadii, RectF paddingRect) {
+        this.cornerRadii = cornerRadii;
         this.paddingRect = paddingRect;
     }
     
@@ -35,7 +35,7 @@ public class CornerShapeDrawable extends RectShape {
             rect.right -= paddingRect.right;
             rect.bottom -= paddingRect.bottom;
         }
-        path.addRoundRect(rect(), cornetRadii, Path.Direction.CCW);
+        path.addRoundRect(rect(), cornerRadii, Path.Direction.CCW);
     }
     
     @Override

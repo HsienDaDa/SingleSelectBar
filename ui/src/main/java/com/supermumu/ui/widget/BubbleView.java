@@ -14,7 +14,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.supermumu.R;
-import com.supermumu.ui.helper.ResHelper;
 
 import java.util.Locale;
 
@@ -69,7 +68,7 @@ public class BubbleView extends View {
         margin2x = getResources().getDimensionPixelSize(R.dimen.margin_2x);
         int colorSelected = Color.RED;
 //        int colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
-        resHelper = new ResHelper(colorSelected, colorSelected, 0, 0, false);
+        resHelper = new ResHelper(colorSelected, colorSelected, 0, 0, 0);
         
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(40);

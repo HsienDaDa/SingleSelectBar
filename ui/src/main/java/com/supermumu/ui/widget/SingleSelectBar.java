@@ -30,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.supermumu.R;
-import com.supermumu.ui.helper.ResHelper;
 
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +64,7 @@ public class SingleSelectBar extends LinearLayout {
     private RectF selectedRectF = new RectF();
     private Path selectedPath = new Path();
     
-    private float transitionX;
+    private float transitionOffsetPos;
     private float animatorValue;
     
     private int currentPos = 0;
@@ -89,8 +88,8 @@ public class SingleSelectBar extends LinearLayout {
     
     private void init(Context context, AttributeSet attrs) {
         setWillNotDraw(false);
-        setGravity(Gravity.CENTER_VERTICAL);
         initSelectBarThemeAttributes(context, attrs);
+        setTabOrientation(HORIZONTAL);
         updateBackground();
     
         tabs = new Tab[MAX_COUNT];
@@ -127,33 +126,33 @@ public class SingleSelectBar extends LinearLayout {
                 0
         );
         
-        itemTextAppearance = a.getResourceId(R.styleable.SingleSelectBar_tabTextAppearance, R.style.TextAppearance_TabText);
+        itemTextAppearance = a.getResourceId(R.styleable.SingleSelectBar_uiTextAppearance, R.style.TextAppearance_TabText);
         
         // Text colors come from the text appearance first
         int colorSelected = getSelectedColorFromStyle(context);
-        if (colorSelected == -1 && a.hasValue(R.styleable.SingleSelectBar_tabColorSelected)) {
-            colorSelected = a.getColor(R.styleable.SingleSelectBar_tabColorSelected, 0);
+        if (colorSelected == -1 && a.hasValue(R.styleable.SingleSelectBar_uiColorSelected)) {
+            colorSelected = a.getColor(R.styleable.SingleSelectBar_uiColorSelected, 0);
         }
     
         int colorUnselected;
-        if (a.hasValue(R.styleable.SingleSelectBar_tabColorUnselected)) {
-            colorUnselected = a.getColor(R.styleable.SingleSelectBar_tabColorUnselected, 0);
+        if (a.hasValue(R.styleable.SingleSelectBar_uiColorUnselected)) {
+            colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, 0);
         } else {
             colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
         }
         
-        if (a.hasValue(R.styleable.SingleSelectBar_tabStrokeWidth)) {
-            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_tabStrokeWidth, 0);
+        if (a.hasValue(R.styleable.SingleSelectBar_uiStrokeWidth)) {
+            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, 0);
         } else {
             dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width);
         }
         
-        boolean tabPressedEffect = a.getBoolean(R.styleable.SingleSelectBar_tabPressedEffect, true);
+        int pressedEffectMode = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectMode, -1);
         
         a.recycle();
     
         int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius);
-        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, tabPressedEffect);
+        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectMode);
     }
     
     private int getSelectedColorFromStyle(Context context) {
@@ -174,6 +173,22 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     @Override
+    public void setOrientation(int orientation) {
+        // force override this to ignore orientation change after init
+    }
+    
+    private void setTabOrientation(int orientation) {
+        super.setOrientation(orientation);
+        
+        if (orientation == LinearLayout.HORIZONTAL) {
+            setGravity(Gravity.CENTER_VERTICAL);
+        } else {
+            setGravity(Gravity.CENTER_HORIZONTAL);
+        }
+        resHelper.setOrientation(orientation);
+    }
+    
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
     
@@ -182,6 +197,14 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     private void drawDividers(Canvas canvas) {
+        if (getOrientation() == HORIZONTAL) {
+            drawHorizontalDividers(canvas);
+        } else {
+            drawVerticalDividers(canvas);
+        }
+    }
+    
+    private void drawHorizontalDividers(Canvas canvas) {
         dividerRect.top = 0;
         dividerRect.bottom = getMeasuredHeight();
         dividerRect.left = - (dividerWidth / 2);
@@ -200,9 +223,28 @@ public class SingleSelectBar extends LinearLayout {
         }
     }
     
+    private void drawVerticalDividers(Canvas canvas) {
+        dividerRect.top = - (dividerWidth / 2);
+        if (dividerRect.top == 0) {
+            dividerRect.top = -1;
+        }
+        dividerRect.bottom = 0;
+        dividerRect.left = 0;
+        dividerRect.right = getMeasuredWidth();
+    
+        for (Tab tab : tabs) {
+            if (tab.getPosition() > 0 && tab.getVisibility() == View.VISIBLE) {
+                resHelper.drawRect(canvas, dividerRect);
+            }
+        
+            dividerRect.top += tab.view.getMeasuredHeight();
+            dividerRect.bottom = dividerRect.top + dividerWidth;
+        }
+    }
+    
     private void dispatchDrawSelectedTabs(Canvas canvas) {
         if (animatorValue >= 1F) {
-            transitionX = 0F;
+            transitionOffsetPos = 0F;
             transitionPos = currentPos;
             drawSelectedTab(canvas, tabs[currentPos]);
         } else {
@@ -211,16 +253,32 @@ public class SingleSelectBar extends LinearLayout {
             } else if (animatorValue > END_TRANSITION_THRESHOLD) {
                 transitionPos = currentPos;
             }
-            float bothViewsDistance = (tabs[currentPos].view.getX() - tabs[previousPos].view.getX());
-            transitionX = (bothViewsDistance * animatorValue);
+            float bothViewsDistance = getBothViewsDistance();
+            transitionOffsetPos = (bothViewsDistance * animatorValue);
             drawSelectedTab(canvas, tabs[previousPos]);
         }
     }
     
-    private void drawSelectedTab(Canvas canvas, Tab Tab) {
-        final float left = Tab.view.getX() + transitionX;
+    private float getBothViewsDistance() {
+        if (getOrientation() == HORIZONTAL) {
+            return (tabs[currentPos].view.getX() - tabs[previousPos].view.getX());
+        } else {
+            return (tabs[currentPos].view.getY() - tabs[previousPos].view.getY());
+        }
+    }
+    
+    private void drawSelectedTab(Canvas canvas, Tab tab) {
+        if (getOrientation() == HORIZONTAL) {
+            drawHorizontalSelectedTab(canvas, tab);
+        } else {
+            drawVerticalSelectedTab(canvas, tab);
+        }
+    }
+    
+    private void drawHorizontalSelectedTab(Canvas canvas, Tab tab) {
+        final float left = tab.view.getX() + transitionOffsetPos;
         final float top = 0;
-        final float right = left + Tab.view.getMeasuredWidth();
+        final float right = left + tab.view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
         final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
     
@@ -228,6 +286,42 @@ public class SingleSelectBar extends LinearLayout {
         for (Tab selectableTab : tabs) {
             int selectedHalfPos = (int) (selectableTab.view.getLeft() + (selectableTab.view.getMeasuredWidth() * 0.5F));
             if (right >= selectedHalfPos && left <= selectedHalfPos) {
+                selectableTab.view.setSelected(true);
+            } else {
+                selectableTab.view.setSelected(false);
+            }
+        }
+        
+        // draw selected Tab
+        selectedPath.reset();
+        if (isStartEndAnimatorValue && (transitionPos == 0)) {
+            selectedRectF.set(left, top, right, bottom);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.START), Path.Direction.CCW);
+            resHelper.drawPath(canvas, selectedPath);
+        } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
+            selectedRectF.set(left, top, right, bottom);
+            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.END), Path.Direction.CCW);
+            resHelper.drawPath(canvas, selectedPath);
+        } else {
+            selectedPath.moveTo(left, top);
+            selectedPath.lineTo(right, top);
+            selectedPath.lineTo(right, bottom);
+            selectedPath.lineTo(left, bottom);
+            resHelper.drawPath(canvas, selectedPath);
+        }
+    }
+    
+    private void drawVerticalSelectedTab(Canvas canvas, Tab tab) {
+        final float left = 0;
+        final float top =  tab.view.getY() + transitionOffsetPos;
+        final float right = getMeasuredWidth();
+        final float bottom = top + tab.view.getMeasuredHeight();
+        final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
+    
+        // change selected/unselected state in scroll transition
+        for (Tab selectableTab : tabs) {
+            int selectedHalfPos = (int) (selectableTab.view.getTop() + (selectableTab.view.getMeasuredHeight() * 0.5F));
+            if (bottom >= selectedHalfPos && top <= selectedHalfPos) {
                 selectableTab.view.setSelected(true);
             } else {
                 selectableTab.view.setSelected(false);
@@ -498,7 +592,7 @@ public class SingleSelectBar extends LinearLayout {
         }
         
         private void initViews(Context context) {
-            final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_2x);
+            final int margin1X = context.getResources().getDimensionPixelSize(R.dimen.margin_1x);
             final int margin3X = context.getResources().getDimensionPixelSize(R.dimen.margin_3x);
             
             textView = new TextView(context);

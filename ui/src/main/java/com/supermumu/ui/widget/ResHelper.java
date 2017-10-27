@@ -1,4 +1,4 @@
-package com.supermumu.ui.helper;
+package com.supermumu.ui.widget;
 
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -16,26 +16,30 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.RequiresApi;
+import android.widget.LinearLayout;
 
-import com.supermumu.ui.graphics.drawable.CornerShapeDrawable;
+import com.supermumu.ui.graphics.drawable.RoundCornerShape;
 
 import java.util.Arrays;
 
 /**
  * Created by hsienhsu on 2017/10/5.
- *
- * @hide
  */
-
-public class ResHelper {
+class ResHelper {
     private static final int RIPPLE_ALPHA_VALUE = 77;
     private static final int PRESSED_ALPHA_VALUE = 51;
+    
+    private static final int PRESSED_EFFECT_MODE_NONE = 0;
+    private static final int PRESSED_EFFECT_MODE_LIGHT = 1;
+    private static final int PRESSED_EFFECT_MODE_DARK = 2;
     
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private int strokeWidth;
-    private boolean showPressedEffect;
+    private int roundRadius;
+    private int pressedEffectMode;
+    private int orientation;
     
     private float[] fullCornerRadii = new float[8];
     private float[] startCornerRadii = new float[8];
@@ -46,27 +50,44 @@ public class ResHelper {
     private Drawable cornerStateDrawable;
     
     public enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
-    
+        
     public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius,
-                     int strokeWidth, boolean showPressedEffect) {
+                     int strokeWidth, int pressedEffectMode) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
+        this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
-        this.showPressedEffect = showPressedEffect;
+        this.pressedEffectMode = pressedEffectMode;
     
         setRoundRadius(roundRadius);
         updateCornerStateDrawable();
     }
     
+    public void setOrientation(int orientation) {
+        this.orientation = orientation;
+        setRoundRadius(roundRadius);
+    }
+    
     public void setRoundRadius(float roundRadius) {
+        // all
         Arrays.fill(fullCornerRadii, roundRadius);
-        
-        Arrays.fill(startCornerRadii, 0, 2, roundRadius);
-        Arrays.fill(startCornerRadii, 6, 8, roundRadius);
-        
+    
+        // center
         Arrays.fill(centerCornerRadii, 0);
-        
-        Arrays.fill(endCornerRadii, 2, 6, roundRadius);
+        if (orientation == LinearLayout.HORIZONTAL) {
+            // start
+            Arrays.fill(startCornerRadii, 0, 2, roundRadius);
+            Arrays.fill(startCornerRadii, 6, 8, roundRadius);
+            
+            // end
+            Arrays.fill(endCornerRadii, 2, 6, roundRadius);
+        } else {
+            // start
+            Arrays.fill(startCornerRadii, 0, 4, roundRadius);
+    
+            // end
+            Arrays.fill(endCornerRadii, 4, 8, roundRadius);
+        }
     }
     
     public boolean setColorSelected(@ColorInt int colorSelected) {
@@ -143,41 +164,64 @@ public class ResHelper {
     }
     
     public Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
-        Drawable backgroundDrawable = null;
-        if (showPressedEffect) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                backgroundDrawable = getRippleEffect(cornerPosition);
-            } else {
-                backgroundDrawable = getPressedEffectBeforeLollipop();
-            }
+        int color = getPressedEffectColor();
+        if (color == -1) {
+            return null;
+        }
+        
+        Drawable backgroundDrawable;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            backgroundDrawable = getRippleEffect(cornerPosition, color);
+        } else {
+            backgroundDrawable = getPressedEffectBeforeLollipop(color);
         }
         return backgroundDrawable;
     }
     
+    private int getPressedEffectColor() {
+        int color;
+        switch (pressedEffectMode) {
+            case PRESSED_EFFECT_MODE_NONE: {
+                color = -1;
+                break;
+            }
+            case PRESSED_EFFECT_MODE_LIGHT: {
+                color = Color.WHITE;
+                break;
+            }
+            case PRESSED_EFFECT_MODE_DARK:
+            default:{
+                color = Color.BLACK;
+                break;
+            }
+        }
+        return color;
+    }
+    
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private Drawable getRippleEffect(CORNER_POSITION cornerPosition) {
-        int[] colors = new int[] {Color.BLACK};
+    private Drawable getRippleEffect(CORNER_POSITION cornerPosition, int color) {
+        int[] colors = new int[] {color};
         int[][] states = new int[1][];
         states[0] = new int[] {android.R.attr.state_enabled, android.R.attr.state_pressed};
         ColorStateList colorStateList = new ColorStateList(states, colors);
     
         Drawable maskDrawable;
         if (CORNER_POSITION.CENTER == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(centerCornerRadii));
+            maskDrawable = new ShapeDrawable(new RoundCornerShape(centerCornerRadii));
         } else if (CORNER_POSITION.START == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(startCornerRadii));
+            maskDrawable = new ShapeDrawable(new RoundCornerShape(startCornerRadii));
         } else if (CORNER_POSITION.END == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(endCornerRadii));
+            maskDrawable = new ShapeDrawable(new RoundCornerShape(endCornerRadii));
         } else {
-            maskDrawable = new ShapeDrawable(new CornerShapeDrawable(fullCornerRadii));
+            maskDrawable = new ShapeDrawable(new RoundCornerShape(fullCornerRadii));
         }
         maskDrawable.setAlpha(RIPPLE_ALPHA_VALUE);
     
         return new RippleDrawable(colorStateList, null, maskDrawable);
     }
     
-    private Drawable getPressedEffectBeforeLollipop() {
-        ColorDrawable colorDrawablePressed = new ColorDrawable(Color.BLACK);
+    private Drawable getPressedEffectBeforeLollipop(int color) {
+        ColorDrawable colorDrawablePressed = new ColorDrawable(color);
         colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
         StateListDrawable textBgDrawable = new StateListDrawable();
         textBgDrawable.addState(new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed}, colorDrawablePressed);
