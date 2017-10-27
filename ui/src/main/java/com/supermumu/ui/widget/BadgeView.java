@@ -21,7 +21,7 @@ import java.util.Locale;
  * Created by hsienhsu on 2017/10/17.
  */
 
-public class BubbleView extends View {
+public class BadgeView extends View {
     
     private ResHelper resHelper;
     
@@ -41,23 +41,23 @@ public class BubbleView extends View {
     
     private enum VIEW_EFFECT {ADD, UPDATE, REMOVE}
     
-    public BubbleView(Context context) {
+    public BadgeView(Context context) {
         super(context);
         init(context, null);
     }
     
-    public BubbleView(Context context, @Nullable AttributeSet attrs) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
     
-    public BubbleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
     
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public BubbleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }

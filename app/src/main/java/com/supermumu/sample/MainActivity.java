@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.supermumu.ui.widget.BubbleView;
 import com.supermumu.ui.widget.SingleSelectBar;
 
 import java.util.ArrayList;
