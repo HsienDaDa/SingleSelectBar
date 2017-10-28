@@ -20,8 +20,7 @@ import java.util.Locale;
 /**
  * Created by hsienhsu on 2017/10/17.
  */
-
-public class BadgeView extends View {
+class BadgeView extends View {
     
     private ResHelper resHelper;
     
