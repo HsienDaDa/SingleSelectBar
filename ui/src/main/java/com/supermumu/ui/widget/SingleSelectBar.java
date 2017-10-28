@@ -134,24 +134,14 @@ public class SingleSelectBar extends LinearLayout {
             colorSelected = a.getColor(R.styleable.SingleSelectBar_uiColorSelected, 0);
         }
     
-        int colorUnselected;
-        if (a.hasValue(R.styleable.SingleSelectBar_uiColorUnselected)) {
-            colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, 0);
-        } else {
-            colorUnselected = ContextCompat.getColor(context, R.color.unselected_theme_color);
-        }
-        
-        if (a.hasValue(R.styleable.SingleSelectBar_uiStrokeWidth)) {
-            dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, 0);
-        } else {
-            dividerWidth = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width);
-        }
-        
+        int colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, ContextCompat.getColor(context, R.color.unselected_theme_color));
+        int dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width));
+        int roundRadius = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiRoundCorner, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
         int pressedEffectMode = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectMode, -1);
         
         a.recycle();
     
-        int roundRadius = context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius);
+        this.dividerWidth = dividerWidth;
         resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectMode);
     }
     

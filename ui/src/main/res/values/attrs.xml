@@ -3,12 +3,13 @@
     <declare-styleable name="SingleSelectBar">
         <attr name="uiColorSelected" format="color"/>
         <attr name="uiColorUnselected" format="color"/>
-        <attr name="uiTextAppearance" format="integer"/>
-        <attr name="uiStrokeWidth" format="dimension"/>
         <attr name="uiPressedEffectMode">
             <enum name="none" value="0"/>
             <enum name="light" value="1"/>
             <enum name="dark" value="2"/>
         </attr>
+        <attr name="uiRoundCorner" format="dimension"/>
+        <attr name="uiStrokeWidth" format="dimension"/>
+        <attr name="uiTextAppearance" format="integer"/>
     </declare-styleable>
 </resources>
