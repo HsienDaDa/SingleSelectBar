@@ -15,6 +15,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
+import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
 import android.widget.LinearLayout;
 
@@ -45,13 +46,14 @@ class ResHelper {
     private float[] startCornerRadii = new float[8];
     private float[] centerCornerRadii = new float[8];
     private float[] endCornerRadii = new float[8];
+    private float[] commonCornerRadii = new float[8];
     
     private ColorStateList textColor;
     private Drawable cornerStateDrawable;
     
-    public enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
+    enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
         
-    public ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius,
+    ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius,
                      int strokeWidth, int pressedEffectMode) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
@@ -63,34 +65,48 @@ class ResHelper {
         updateCornerStateDrawable();
     }
     
-    public void setOrientation(int orientation) {
+    void setOrientation(int orientation) {
         this.orientation = orientation;
         setRoundRadius(roundRadius);
     }
     
-    public void setRoundRadius(float roundRadius) {
+    void setRoundRadius(float roundRadius) {
         // all
         Arrays.fill(fullCornerRadii, roundRadius);
     
         // center
         Arrays.fill(centerCornerRadii, 0);
-        if (orientation == LinearLayout.HORIZONTAL) {
-            // start
-            Arrays.fill(startCornerRadii, 0, 2, roundRadius);
-            Arrays.fill(startCornerRadii, 6, 8, roundRadius);
-            
-            // end
-            Arrays.fill(endCornerRadii, 2, 6, roundRadius);
-        } else {
-            // start
-            Arrays.fill(startCornerRadii, 0, 4, roundRadius);
     
-            // end
-            Arrays.fill(endCornerRadii, 4, 8, roundRadius);
+        // start
+        setStartRoundRadius(startCornerRadii, roundRadius);
+        
+        // end
+        setEndRoundRadius(endCornerRadii, roundRadius);
+    }
+    
+    private void setStartRoundRadius(float[] cornetRadii, float roundRadius) {
+        if (orientation == LinearLayout.HORIZONTAL) {
+            Arrays.fill(cornetRadii, 0, 2, roundRadius);
+            Arrays.fill(cornetRadii, 2, 6, 0F);
+            Arrays.fill(cornetRadii, 6, 8, roundRadius);
+        } else {
+            Arrays.fill(cornetRadii, 0, 4, roundRadius);
+            Arrays.fill(cornetRadii, 4, 8, 0F);
         }
     }
     
-    public boolean setColorSelected(@ColorInt int colorSelected) {
+    private void setEndRoundRadius(float[] cornetRadii, float roundRadius) {
+        if (orientation == LinearLayout.HORIZONTAL) {
+            Arrays.fill(cornetRadii, 0, 2, 0F);
+            Arrays.fill(cornetRadii, 2, 6, roundRadius);
+            Arrays.fill(cornetRadii, 6, 8, 0F);
+        } else {
+            Arrays.fill(cornetRadii, 0, 4, 0F);
+            Arrays.fill(cornetRadii, 4, 8, roundRadius);
+        }
+    }
+    
+    boolean setColorSelected(@ColorInt int colorSelected) {
         boolean hasChanged = false;
         if (this.colorSelected != colorSelected) {
             this.colorSelected = colorSelected;
@@ -102,7 +118,7 @@ class ResHelper {
         return hasChanged;
     }
     
-    public boolean setColorUnselected(@ColorInt int colorUnselected) {
+    boolean setColorUnselected(@ColorInt int colorUnselected) {
         boolean hasChanged = false;
         if (this.colorUnselected != colorUnselected) {
             this.colorUnselected = colorUnselected;
@@ -113,7 +129,7 @@ class ResHelper {
         return hasChanged;
     }
     
-    public boolean setTabStrokeWidth(@Dimension int strokeWidth) {
+    boolean setTabStrokeWidth(@Dimension int strokeWidth) {
         boolean hasChanged = false;
         if (this.strokeWidth != strokeWidth) {
             this.strokeWidth = strokeWidth;
@@ -123,17 +139,19 @@ class ResHelper {
         return hasChanged;
     }
     
-    public Drawable getTabBackgroundDrawable() {
+    Drawable getTabBackgroundDrawable() {
         return cornerStateDrawable;
     }
     
-    public float[] getCornerRadii(CORNER_POSITION cornerPosition) {
+    float[] getCornerRadii(CORNER_POSITION cornerPosition, @FloatRange(from = 0.0F, to = 1.0F) float scrollPercent) {
         if (CORNER_POSITION.CENTER == cornerPosition) {
             return centerCornerRadii;
         } else if (CORNER_POSITION.START == cornerPosition) {
-            return startCornerRadii;
+            setStartRoundRadius(commonCornerRadii, roundRadius * scrollPercent);
+            return commonCornerRadii;
         } else if (CORNER_POSITION.END == cornerPosition) {
-            return endCornerRadii;
+            setEndRoundRadius(commonCornerRadii, roundRadius * scrollPercent);
+            return commonCornerRadii;
         } else {
             return fullCornerRadii;
         }
@@ -159,11 +177,11 @@ class ResHelper {
         textColor = new ColorStateList(states, colors);
     }
     
-    public ColorStateList getTextColorStateList() {
+    ColorStateList getTextColorStateList() {
         return textColor;
     }
     
-    public Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
+    Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
         int color = getPressedEffectColor();
         if (color == -1) {
             return null;
@@ -228,11 +246,11 @@ class ResHelper {
         return textBgDrawable;
     }
     
-    public void drawRect(Canvas canvas, Rect rect) {
+    void drawRect(Canvas canvas, Rect rect) {
         canvas.drawRect(rect, selectedColorPaint);
     }
     
-    public void drawPath(Canvas canvas, Path path) {
+    void drawPath(Canvas canvas, Path path) {
         canvas.drawPath(path, selectedColorPaint);
     }
 }

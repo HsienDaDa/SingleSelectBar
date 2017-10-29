@@ -145,7 +145,7 @@ class BadgeView extends View {
             }
             resHelper.setRoundRadius(radiusX);
             rectF.set(viewX - radiusX, viewY + radiusY, viewX + radiusX, viewY - radiusY);
-            circlePath.addRoundRect(rectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.ALL), Path.Direction.CCW);
+            circlePath.addRoundRect(rectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.ALL, 1.0F), Path.Direction.CCW);
         }
         resHelper.drawPath(canvas, circlePath);
     

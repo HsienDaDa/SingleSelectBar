@@ -57,8 +57,9 @@ public class SingleSelectBar extends LinearLayout {
     private OnTabSelectListener itemSelectListener;
     
     private ResHelper resHelper;
-    private int visibleButtonCount;
+    private int visibleTabCount;
     private int dividerWidth;
+    private int roundRadius;
     
     private Rect dividerRect = new Rect();
     private RectF selectedRectF = new RectF();
@@ -69,7 +70,6 @@ public class SingleSelectBar extends LinearLayout {
     
     private int currentPos = 0;
     private int previousPos = 0;
-    private int transitionPos = 0;
     
     public SingleSelectBar(Context context) {
         super(context);
@@ -137,11 +137,15 @@ public class SingleSelectBar extends LinearLayout {
         int colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, ContextCompat.getColor(context, R.color.unselected_theme_color));
         int dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width));
         int roundRadius = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiRoundCorner, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
+        if (roundRadius > 180) {
+            roundRadius = 180;
+        }
         int pressedEffectMode = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectMode, -1);
         
         a.recycle();
     
         this.dividerWidth = dividerWidth;
+        this.roundRadius = roundRadius;
         resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectMode);
     }
     
@@ -204,11 +208,14 @@ public class SingleSelectBar extends LinearLayout {
         dividerRect.right = 0;
         
         for (Tab tab : tabs) {
-            if (tab.getPosition() > 0 && tab.getVisibility() == View.VISIBLE) {
+            int leftPadding = 0;
+            if (tab.getPosition() == 0) {
+                leftPadding = getPaddingLeft();
+            } else if (tab.getPosition() > 0 && tab.getVisibility() == View.VISIBLE) {
                 resHelper.drawRect(canvas, dividerRect);
             }
     
-            dividerRect.left += tab.view.getMeasuredWidth();
+            dividerRect.left += (leftPadding + tab.view.getMeasuredWidth());
             dividerRect.right = dividerRect.left + dividerWidth;
         }
     }
@@ -235,14 +242,8 @@ public class SingleSelectBar extends LinearLayout {
     private void dispatchDrawSelectedTabs(Canvas canvas) {
         if (animatorValue >= 1F) {
             transitionOffsetPos = 0F;
-            transitionPos = currentPos;
             drawSelectedTab(canvas, tabs[currentPos]);
         } else {
-            if (animatorValue < START_TRANSITION_THRESHOLD) {
-                transitionPos = previousPos;
-            } else if (animatorValue > END_TRANSITION_THRESHOLD) {
-                transitionPos = currentPos;
-            }
             float bothViewsDistance = getBothViewsDistance();
             transitionOffsetPos = (bothViewsDistance * animatorValue);
             drawSelectedTab(canvas, tabs[previousPos]);
@@ -266,15 +267,15 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     private void drawHorizontalSelectedTab(Canvas canvas, Tab tab) {
+        final float width = getMeasuredWidth();
         final float left = tab.view.getX() + transitionOffsetPos;
         final float top = 0;
         final float right = left + tab.view.getMeasuredWidth();
         final float bottom = getMeasuredHeight();
-        final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
-    
+        
         // change selected/unselected state in scroll transition
         for (Tab selectableTab : tabs) {
-            int selectedHalfPos = (int) (selectableTab.view.getLeft() + (selectableTab.view.getMeasuredWidth() * 0.5F));
+            float selectedHalfPos = (selectableTab.view.getLeft() + (selectableTab.view.getMeasuredWidth() * 0.5F));
             if (right >= selectedHalfPos && left <= selectedHalfPos) {
                 selectableTab.view.setSelected(true);
             } else {
@@ -284,33 +285,35 @@ public class SingleSelectBar extends LinearLayout {
         
         // draw selected Tab
         selectedPath.reset();
-        if (isStartEndAnimatorValue && (transitionPos == 0)) {
-            selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.START), Path.Direction.CCW);
-            resHelper.drawPath(canvas, selectedPath);
-        } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
-            selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.END), Path.Direction.CCW);
-            resHelper.drawPath(canvas, selectedPath);
+        final float drawRoundCornerThreshold = (getMeasuredHeight() / 2);
+        final float scrollPercent;
+        final ResHelper.CORNER_POSITION cornerPosition;
+        if ((left < drawRoundCornerThreshold)) {
+            scrollPercent = ((drawRoundCornerThreshold - left) / drawRoundCornerThreshold);
+            cornerPosition = ResHelper.CORNER_POSITION.START;
+        } else if ((right > (width - drawRoundCornerThreshold))) {
+            scrollPercent = ((right - (width - drawRoundCornerThreshold))/ drawRoundCornerThreshold);
+            cornerPosition = ResHelper.CORNER_POSITION.END;
         } else {
-            selectedPath.moveTo(left, top);
-            selectedPath.lineTo(right, top);
-            selectedPath.lineTo(right, bottom);
-            selectedPath.lineTo(left, bottom);
-            resHelper.drawPath(canvas, selectedPath);
+            scrollPercent = 1F;
+            cornerPosition = ResHelper.CORNER_POSITION.CENTER;
         }
+        
+        selectedRectF.set(left, top, right, bottom);
+        selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(cornerPosition, scrollPercent), Path.Direction.CCW);
+        resHelper.drawPath(canvas, selectedPath);
     }
     
     private void drawVerticalSelectedTab(Canvas canvas, Tab tab) {
+        final float height = getMeasuredHeight();
         final float left = 0;
         final float top =  tab.view.getY() + transitionOffsetPos;
         final float right = getMeasuredWidth();
         final float bottom = top + tab.view.getMeasuredHeight();
-        final boolean isStartEndAnimatorValue = (animatorValue < START_TRANSITION_THRESHOLD || animatorValue > END_TRANSITION_THRESHOLD);
     
         // change selected/unselected state in scroll transition
         for (Tab selectableTab : tabs) {
-            int selectedHalfPos = (int) (selectableTab.view.getTop() + (selectableTab.view.getMeasuredHeight() * 0.5F));
+            float selectedHalfPos = (selectableTab.view.getTop() + (selectableTab.view.getMeasuredHeight() * 0.5F));
             if (bottom >= selectedHalfPos && top <= selectedHalfPos) {
                 selectableTab.view.setSelected(true);
             } else {
@@ -320,21 +323,23 @@ public class SingleSelectBar extends LinearLayout {
         
         // draw selected Tab
         selectedPath.reset();
-        if (isStartEndAnimatorValue && (transitionPos == 0)) {
-            selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.START), Path.Direction.CCW);
-            resHelper.drawPath(canvas, selectedPath);
-        } else if (isStartEndAnimatorValue && (transitionPos == visibleButtonCount - 1)) {
-            selectedRectF.set(left, top, right, bottom);
-            selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.END), Path.Direction.CCW);
-            resHelper.drawPath(canvas, selectedPath);
+        final float drawRoundCornerThreshold = (getMeasuredWidth() / 2);
+        final float scrollPercent;
+        final ResHelper.CORNER_POSITION cornerPosition;
+        if ((top < drawRoundCornerThreshold)) {
+            scrollPercent = ((drawRoundCornerThreshold - top) / drawRoundCornerThreshold);
+            cornerPosition = ResHelper.CORNER_POSITION.START;
+        } else if ((bottom > (height - drawRoundCornerThreshold))) {
+            scrollPercent = ((bottom - (height - drawRoundCornerThreshold))/ drawRoundCornerThreshold);
+            cornerPosition = ResHelper.CORNER_POSITION.END;
         } else {
-            selectedPath.moveTo(left, top);
-            selectedPath.lineTo(right, top);
-            selectedPath.lineTo(right, bottom);
-            selectedPath.lineTo(left, bottom);
-            resHelper.drawPath(canvas, selectedPath);
+            scrollPercent = 1F;
+            cornerPosition = ResHelper.CORNER_POSITION.CENTER;
         }
+    
+        selectedRectF.set(left, top, right, bottom);
+        selectedPath.addRoundRect(selectedRectF, resHelper.getCornerRadii(cornerPosition, scrollPercent), Path.Direction.CCW);
+        resHelper.drawPath(canvas, selectedPath);
     }
     
     /**
@@ -357,24 +362,30 @@ public class SingleSelectBar extends LinearLayout {
      * @throws IndexOutOfBoundsException &nbsp;
      */
     public void setTabs(@NonNull List<CharSequence> list, @IntRange(from = 0, to = MAX_COUNT - 1) int selectorPos) {
-        visibleButtonCount = checkButtonCount(list.size());
-        
+        checkTabCount(list.size());
+    
+        visibleTabCount = 0;
+        final int tabTextCount = list.size();
         for (Tab tab : tabs) {
+            CharSequence text = null;
             int tabPos = tab.getPosition();
-            if (tabPos < visibleButtonCount) {
+            if (tabPos < tabTextCount) {
                 if (tabPos == 0) {
                     updateTabTextBackground(tab, ResHelper.CORNER_POSITION.START);
-                } else if (tabPos == (visibleButtonCount - 1)) {
+                } else if (tabPos == (tabTextCount - 1)) {
                     updateTabTextBackground(tab, ResHelper.CORNER_POSITION.END);
                 } else {
                     updateTabTextBackground(tab, ResHelper.CORNER_POSITION.CENTER);
                 }
-                
-                tab.setText(list.get(tab.getPosition()));
-            } else {
-                tab.setText(null);
+                text = list.get(tab.getPosition());
+            }
+            tab.setText(text);
+            
+            if (tab.getVisibility() == View.VISIBLE) {
+                visibleTabCount++;
             }
         }
+        updateTabPadding();
     
         setSelector(selectorPos);
     }
@@ -384,6 +395,21 @@ public class SingleSelectBar extends LinearLayout {
             Drawable backgroundDrawable = resHelper.getTextBgDrawable(position);
             tab.view.setBackground(backgroundDrawable);
             tab.setCornerPosition(position);
+        }
+    }
+    
+    private void updateTabPadding() {
+        int padding = ((roundRadius / 2) / visibleTabCount);
+        for (Tab tab: tabs) {
+            if (tab.getCornerPosition() == ResHelper.CORNER_POSITION.START) {
+                tab.view.setPadding(padding, 0, 0, 0);
+            } else if (tab.getCornerPosition() == ResHelper.CORNER_POSITION.CENTER) {
+                tab.view.setPadding(0, 0, 0, 0);
+            } else if (tab.getCornerPosition() == ResHelper.CORNER_POSITION.END) {
+                tab.view.setPadding(0, 0, padding, 0);
+            } else {
+                tab.view.setPadding(padding, 0, padding, 0);
+            }
         }
     }
     
@@ -405,12 +431,10 @@ public class SingleSelectBar extends LinearLayout {
         return MIN_COUNT;
     }
     
-    @IntRange(from = MIN_COUNT, to = MAX_COUNT)
-    private int checkButtonCount(int count) {
+    private void checkTabCount(int count) {
         if (MIN_COUNT > count || count > MAX_COUNT) {
             throw new IndexOutOfBoundsException(String.format(Locale.getDefault(), "The Tab count must be %d to %d", MIN_COUNT, MAX_COUNT));
         }
-        return count;
     }
     
     private OnClickListener clickListener = new OnClickListener() {
@@ -534,8 +558,8 @@ public class SingleSelectBar extends LinearLayout {
      * @see #getMinSelectorCount()
      */
     public void setSelector(@IntRange(from = 0, to = MAX_COUNT - 1) int position) {
-        if (position > visibleButtonCount) {
-            position = (visibleButtonCount - 1);
+        if (position > visibleTabCount) {
+            position = (visibleTabCount - 1);
         } else if (position < 0) {
             position = 0;
         }
