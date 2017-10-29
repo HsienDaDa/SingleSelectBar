@@ -36,7 +36,7 @@
         app:uiColorSelected="@color/colorPrimary"
         app:uiColorUnselected="@android:color/white"
         app:uiPressedEffectMode="none"
-        app:uiRoundCorner="180px"
+        app:uiRoundCornerRadius="180px"
         app:uiStrokeWidth="3dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

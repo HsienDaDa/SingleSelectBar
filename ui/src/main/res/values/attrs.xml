@@ -8,7 +8,7 @@
             <enum name="light" value="1"/>
             <enum name="dark" value="2"/>
         </attr>
-        <attr name="uiRoundCorner" format="dimension"/>
+        <attr name="uiRoundCornerRadius" format="dimension"/>
         <attr name="uiStrokeWidth" format="dimension"/>
         <attr name="uiTextAppearance" format="integer"/>
     </declare-styleable>

@@ -134,7 +134,7 @@ public class SingleSelectBar extends LinearLayout {
     
         int colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, ContextCompat.getColor(context, R.color.unselected_theme_color));
         int dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width));
-        int roundRadius = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiRoundCorner, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
+        int roundRadius = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiRoundCornerRadius, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
         if (roundRadius > 180) {
             roundRadius = 180;
         }

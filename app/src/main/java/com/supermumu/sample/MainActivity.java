@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
         title.setText("Five items:" +
-                "\n - customize height" +
-                "\n - customize stroke width" +
-                "\n - customize round corner" +
-                "\n - disable pressed effect ");
+                "\n - customize height=100dp" +
+                "\n - customize stroke width=3dp" +
+                "\n - customize round corner radius=180px" +
+                "\n - disable pressed effect=none ");
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
