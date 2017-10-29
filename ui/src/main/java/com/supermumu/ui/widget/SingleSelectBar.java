@@ -40,8 +40,6 @@ import java.util.Locale;
 
 public class SingleSelectBar extends LinearLayout {
     private static final int ANIMATION_DURATION = 550;
-    private static final float START_TRANSITION_THRESHOLD = 0.05F;
-    private static final float END_TRANSITION_THRESHOLD = 0.95F;
     private static final int MIN_COUNT = 2;
     private static final int MAX_COUNT = 5;
     private Tab[] tabs;
@@ -445,22 +443,29 @@ public class SingleSelectBar extends LinearLayout {
             for (Tab tab : tabs) {
                 if (tab.view == view) {
                     currentPos = tab.getPosition();
-            
-                    ensureScrollAnimator();
-                    if (scrollAnimator.isRunning()) {
-                        scrollAnimator.end();
-                    }
-                    scrollAnimator.start();
     
-                    if (previousPos == currentPos) {
-                        scrollAnimator.end();
-                    }
-                    
+                    performScrollAnimator();
                     if (null != itemSelectListener) {
                         itemSelectListener.onSelect(currentPos, view);
                     }
                     break;
                 }
+            }
+        }
+        
+        private void performScrollAnimator() {
+            if (previousPos == currentPos) {
+                return;
+            }
+            
+            ensureScrollAnimator();
+            if (scrollAnimator.isRunning()) {
+                scrollAnimator.end();
+            }
+            scrollAnimator.start();
+    
+            if (previousPos == currentPos) {
+                scrollAnimator.end();
             }
         }
     };
