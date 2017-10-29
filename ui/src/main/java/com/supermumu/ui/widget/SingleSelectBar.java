@@ -57,7 +57,7 @@ public class SingleSelectBar extends LinearLayout {
     private ResHelper resHelper;
     private int visibleTabCount;
     private int dividerWidth;
-    private int roundRadius;
+    private float roundRadius;
     
     private Rect dividerRect = new Rect();
     private RectF selectedRectF = new RectF();
@@ -134,17 +134,17 @@ public class SingleSelectBar extends LinearLayout {
     
         int colorUnselected = a.getColor(R.styleable.SingleSelectBar_uiColorUnselected, ContextCompat.getColor(context, R.color.unselected_theme_color));
         int dividerWidth = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiStrokeWidth, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_stroke_width));
-        int roundRadius = a.getDimensionPixelSize(R.styleable.SingleSelectBar_uiRoundCornerRadius, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
-        if (roundRadius > 180) {
-            roundRadius = 180;
+        float roundRadius = a.getDimension(R.styleable.SingleSelectBar_uiRoundCornerRadius, context.getResources().getDimensionPixelSize(R.dimen.single_select_tab_radius));
+        if (roundRadius > 180F) {
+            roundRadius = 180F;
         }
-        int pressedEffectMode = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectMode, -1);
+        int pressedEffectStyle = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectStyle, -1);
         
         a.recycle();
     
         this.dividerWidth = dividerWidth;
         this.roundRadius = roundRadius;
-        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectMode);
+        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectStyle);
     }
     
     private int getSelectedColorFromStyle(Context context) {
@@ -397,7 +397,7 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     private void updateTabPadding() {
-        int padding = ((roundRadius / 2) / visibleTabCount);
+        int padding = (int) (roundRadius / (visibleTabCount * 2));
         for (Tab tab: tabs) {
             if (tab.getCornerPosition() == ResHelper.CORNER_POSITION.START) {
                 tab.view.setPadding(padding, 0, 0, 0);

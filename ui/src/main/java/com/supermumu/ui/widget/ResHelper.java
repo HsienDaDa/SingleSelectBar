@@ -38,7 +38,7 @@ class ResHelper {
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
     private int strokeWidth;
-    private int roundRadius;
+    private float roundRadius;
     private int pressedEffectMode;
     private int orientation;
     
@@ -53,7 +53,7 @@ class ResHelper {
     
     enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
         
-    ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, int roundRadius,
+    ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, float roundRadius,
                      int strokeWidth, int pressedEffectMode) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
@@ -75,7 +75,7 @@ class ResHelper {
         Arrays.fill(fullCornerRadii, roundRadius);
     
         // center
-        Arrays.fill(centerCornerRadii, 0);
+        Arrays.fill(centerCornerRadii, 0F);
     
         // start
         setStartRoundRadius(startCornerRadii, roundRadius);

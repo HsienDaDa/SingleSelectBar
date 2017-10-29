@@ -3,7 +3,7 @@
     <declare-styleable name="SingleSelectBar">
         <attr name="uiColorSelected" format="color"/>
         <attr name="uiColorUnselected" format="color"/>
-        <attr name="uiPressedEffectMode">
+        <attr name="uiPressedEffectStyle">
             <enum name="none" value="0"/>
             <enum name="light" value="1"/>
             <enum name="dark" value="2"/>
