@@ -2,7 +2,6 @@ package com.supermumu.ui.widget;
 
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -17,6 +16,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.widget.LinearLayout;
 
 import com.supermumu.ui.graphics.drawable.RoundCornerShape;
@@ -30,16 +30,12 @@ class ResHelper {
     private static final int RIPPLE_ALPHA_VALUE = 77;
     private static final int PRESSED_ALPHA_VALUE = 51;
     
-    private static final int PRESSED_EFFECT_MODE_NONE = 0;
-    private static final int PRESSED_EFFECT_MODE_LIGHT = 1;
-    private static final int PRESSED_EFFECT_MODE_DARK = 2;
-    
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
     private @ColorInt int colorUnselected;
+    private @ColorInt int colorPressed;
     private int strokeWidth;
     private float roundRadius;
-    private int pressedEffectMode;
     private int orientation;
     
     private float[] fullCornerRadii = new float[8];
@@ -54,13 +50,13 @@ class ResHelper {
     enum CORNER_POSITION {UNSET, START, CENTER, END, ALL}
         
     ResHelper(@ColorInt int colorSelected, @ColorInt int colorUnselected, float roundRadius,
-                     int strokeWidth, int pressedEffectMode) {
+                     int strokeWidth, @ColorInt int colorPressed) {
         setColorSelected(colorSelected);
         setColorUnselected(colorUnselected);
         this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
-        this.pressedEffectMode = pressedEffectMode;
     
+        setColorPressed(colorPressed);
         setRoundRadius(roundRadius);
         updateCornerStateDrawable();
     }
@@ -129,6 +125,10 @@ class ResHelper {
         return hasChanged;
     }
     
+    void setColorPressed(@ColorInt int colorPressed) {
+        this.colorPressed = colorPressed;
+    }
+    
     boolean setTabStrokeWidth(@Dimension int strokeWidth) {
         boolean hasChanged = false;
         if (this.strokeWidth != strokeWidth) {
@@ -182,7 +182,7 @@ class ResHelper {
     }
     
     Drawable getTextBgDrawable(CORNER_POSITION cornerPosition) {
-        int color = getPressedEffectColor();
+        int color = colorPressed;
         if (color == -1) {
             return null;
         }
@@ -194,26 +194,6 @@ class ResHelper {
             backgroundDrawable = getPressedEffectBeforeLollipop(color);
         }
         return backgroundDrawable;
-    }
-    
-    private int getPressedEffectColor() {
-        int color;
-        switch (pressedEffectMode) {
-            case PRESSED_EFFECT_MODE_NONE: {
-                color = -1;
-                break;
-            }
-            case PRESSED_EFFECT_MODE_LIGHT: {
-                color = Color.WHITE;
-                break;
-            }
-            case PRESSED_EFFECT_MODE_DARK:
-            default:{
-                color = Color.BLACK;
-                break;
-            }
-        }
-        return color;
     }
     
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

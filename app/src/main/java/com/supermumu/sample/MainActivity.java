@@ -56,7 +56,10 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setUnselectedColor(Color.CYAN);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
-        title.setText("Four items: \n - customize selected/unselected colors");
+        title.setText("Four items: " +
+                "\n - customize selected/unselected colors" +
+                "\n - customize pressed effect colors=WHITE");
+        selectBar.setPressedEffectStyle(SingleSelectBar.LIGHT);
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {

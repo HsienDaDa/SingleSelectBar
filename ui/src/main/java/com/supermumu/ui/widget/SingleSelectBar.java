@@ -7,12 +7,14 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
+import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
@@ -31,6 +33,8 @@ import android.widget.TextView;
 
 import com.supermumu.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Locale;
 
@@ -50,6 +54,15 @@ public class SingleSelectBar extends LinearLayout {
     
     public interface OnTabSelectListener {
         void onSelect(int position, View view);
+    }
+    
+    public static final int NONE = 0;
+    public static final int LIGHT = 1;
+    public static final int DARK = 2;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({NONE, LIGHT, DARK})
+    public @interface EffectStyle {
+        
     }
     
     private OnTabSelectListener itemSelectListener;
@@ -138,13 +151,30 @@ public class SingleSelectBar extends LinearLayout {
         if (roundRadius > 180F) {
             roundRadius = 180F;
         }
-        int pressedEffectStyle = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectStyle, -1);
+        int pressedEffectStyle = a.getInt(R.styleable.SingleSelectBar_uiPressedEffectStyle, DARK);
         
         a.recycle();
-    
+        
         this.dividerWidth = dividerWidth;
         this.roundRadius = roundRadius;
-        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedEffectStyle);
+        int pressedColor = getPressedStyleColor(pressedEffectStyle);
+        resHelper = new ResHelper(colorSelected, colorUnselected, roundRadius, dividerWidth, pressedColor);
+    }
+    
+    @ColorInt
+    private int getPressedStyleColor(int style) {
+        switch (style) {
+            case DARK: {
+                return Color.BLACK;
+            }
+            case LIGHT: {
+                return Color.WHITE;
+            }
+            case NONE:
+            default: {
+                return -1;
+            }
+        }
     }
     
     private int getSelectedColorFromStyle(Context context) {
@@ -368,12 +398,17 @@ public class SingleSelectBar extends LinearLayout {
             CharSequence text = null;
             int tabPos = tab.getPosition();
             if (tabPos < tabTextCount) {
+                ResHelper.CORNER_POSITION cornerPos;
                 if (tabPos == 0) {
-                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.START);
+                    cornerPos = ResHelper.CORNER_POSITION.START;
                 } else if (tabPos == (tabTextCount - 1)) {
-                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.END);
+                    cornerPos = ResHelper.CORNER_POSITION.END;
                 } else {
-                    updateTabTextBackground(tab, ResHelper.CORNER_POSITION.CENTER);
+                    cornerPos = ResHelper.CORNER_POSITION.CENTER;
+                }
+    
+                if (tab.getCornerPosition() != cornerPos) {
+                    updateTabTextBackground(tab, cornerPos);
                 }
                 text = list.get(tab.getPosition());
             }
@@ -389,11 +424,9 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     private void updateTabTextBackground(Tab tab, ResHelper.CORNER_POSITION position) {
-        if (tab.getCornerPosition() != position) {
-            Drawable backgroundDrawable = resHelper.getTextBgDrawable(position);
-            tab.view.setBackground(backgroundDrawable);
-            tab.setCornerPosition(position);
-        }
+        Drawable backgroundDrawable = resHelper.getTextBgDrawable(position);
+        tab.view.setBackground(backgroundDrawable);
+        tab.setCornerPosition(position);
     }
     
     private void updateTabPadding() {
@@ -539,6 +572,22 @@ public class SingleSelectBar extends LinearLayout {
             updateBackground();
             invalidTextColor();
             invalidate();
+        }
+    }
+    
+    /**
+     * Set a pressed effect style color {@link #NONE}/{@link #DARK}/{@link #LIGHT}.
+     *
+     * @param style The style of pressed effect.
+     */
+    public void setPressedEffectStyle(@EffectStyle int style) {
+        int pressedColor = getPressedStyleColor(style);
+        resHelper.setColorPressed(pressedColor);
+        
+        for (Tab tab : tabs) {
+            if (tab.getCornerPosition() != ResHelper.CORNER_POSITION.UNSET) {
+                updateTabTextBackground(tab, tab.getCornerPosition());
+            }
         }
     }
     
