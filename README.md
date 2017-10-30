@@ -34,6 +34,7 @@ bar.setSelectedColor(Color.RED);
 bar.setUnselectedColor(Color.BLACK);
 bar.setTabTextAppearance(R.style.text_appearance);
 bar.setTabStrokeWidth(4);
+bar.setPressedEffectStyle(SingleSelectBar.DARK);
 ```
 In Xml:
 ```xml
