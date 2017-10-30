@@ -7,9 +7,9 @@ SingleSelectBar
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 [![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/supermumu/SingleSelectBar/blob/master/LICENSE.txt)
 
-### New release v1.0.4:
+### New release v1.0.5:
 
-<img src="https://user-images.githubusercontent.com/32517342/31831667-ce90f4ca-b5f6-11e7-97c7-12fb0d11f9b5.gif" width="30%" />
+<img src="https://user-images.githubusercontent.com/32517342/32175182-176c87f2-bdbf-11e7-86db-b506610bca3e.gif" width="30%" />
 
 SuperMuMu's ui is a Java library with custom view components.
 
@@ -20,7 +20,7 @@ SuperMuMu's ui is a Java library with custom view components.
   * To use SuperMuMu-UI in Android
 ```
 dependencies {
-    compile 'com.supermumu:ui:1.0.4'
+    compile 'com.supermumu:ui:1.0.5'
 }
 ```
 
@@ -29,42 +29,42 @@ dependencies {
 
 In Java:
 ```java
-SingleSelectBar tabBar = new SingleSelectBar(context);
-tabBar.setSelectedColor(Color.RED);
-tabBar.setUnselectedColor(Color.BLACK);
-tabBar.setTabTextAppearance(R.style.text_appearance);
-tabBar.setTabStrokeWidth(4);
+SingleSelectBar bar = new SingleSelectBar(context);
+bar.setSelectedColor(Color.RED);
+bar.setUnselectedColor(Color.BLACK);
+bar.setTabTextAppearance(R.style.text_appearance);
+bar.setTabStrokeWidth(4);
 ```
 In Xml:
 ```xml
 <com.supermumu.ui.widget.SingleSelectBoard
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:tabColorSelected="@color/colorPrimary"
-        app:tabColorUnselected="@android:color/white"
-        app:tabTextAppearance="@style/TextAppearance.CustomText"
-        app:tabStrokeWidth="3dp"
-        app:tabPressedEffect="true"/>
+        app:uiColorSelected="@color/colorPrimary"
+        app:uiColorUnselected="@android:color/white"
+        app:uiPressedEffectStyle="none"
+        app:uiRoundCornerRadius="180px"
+        app:uiStrokeWidth="3dp"/>
 ```
 
 **Sets display list of CharSequence(max=5)**
 
 In Java:
 ```java
-SingleSelectBoard board = new SingleSelectBoard(context);
+SingleSelectBar bar = new SingleSelectBoard(context);
 ...
-board.setItems(list);
+bar.setTabs(list);
 or
-board.setItems(list, 3);
+bar.setTabs(list, 3);
 ```
 
 **Listen all select callback**
 
 In Java:
 ```java
-SingleSelectBoard board = new SingleSelectBoard(context);
+SingleSelectBar bar = new SingleSelectBoard(context);
 ...
-board..setOnItemSelectListener(new SingleSelectBoard.OnItemSelectListener() {
+bar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
                 // do something...
