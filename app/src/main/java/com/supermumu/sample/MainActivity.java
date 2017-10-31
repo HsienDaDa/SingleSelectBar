@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.supermumu.ui.widget.BubbleView;
 import com.supermumu.ui.widget.SingleSelectBar;
 
 import java.util.ArrayList;
@@ -57,7 +56,10 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setUnselectedColor(Color.CYAN);
         title = sampleView.findViewById(R.id.title);
         final TextView result3 = sampleView.findViewById(R.id.result);
-        title.setText("Four items: \n - customize selected/unselected colors");
+        title.setText("Four items: " +
+                "\n - customize selected/unselected colors" +
+                "\n - customize pressed effect colors=WHITE");
+        selectBar.setPressedEffectStyle(SingleSelectBar.LIGHT);
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
@@ -70,7 +72,11 @@ public class MainActivity extends AppCompatActivity {
         selectBar = sampleView.findViewById(R.id.single_select_bar);
         title = sampleView.findViewById(R.id.title);
         final TextView result4 = sampleView.findViewById(R.id.result);
-        title.setText("Five items:\n - customize height\n - customize stroke width\n - disable pressed effect ");
+        title.setText("Five items:" +
+                "\n - customize height=100dp" +
+                "\n - customize stroke width=3dp" +
+                "\n - customize round corner radius=180px" +
+                "\n - disable pressed effect=none ");
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {

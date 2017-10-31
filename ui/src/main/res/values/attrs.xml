@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="SingleSelectBar">
-        <attr name="tabColorSelected" format="color"/>
-        <attr name="tabColorUnselected" format="color"/>
-        <attr name="tabTextAppearance" format="integer"/>
-        <attr name="tabStrokeWidth" format="dimension"/>
-        <attr name="tabPressedEffect" format="boolean"/>
+        <attr name="uiColorSelected" format="color"/>
+        <attr name="uiColorUnselected" format="color"/>
+        <attr name="uiPressedEffectStyle">
+            <enum name="none" value="0"/>
+            <enum name="light" value="1"/>
+            <enum name="dark" value="2"/>
+        </attr>
+        <attr name="uiRoundCornerRadius" format="dimension"/>
+        <attr name="uiStrokeWidth" format="dimension"/>
+        <attr name="uiTextAppearance" format="integer"/>
     </declare-styleable>
 </resources>

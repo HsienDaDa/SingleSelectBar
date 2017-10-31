@@ -14,15 +14,13 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.supermumu.R;
-import com.supermumu.ui.helper.ResHelper;
 
 import java.util.Locale;
 
 /**
  * Created by hsienhsu on 2017/10/17.
  */
-
-public class BubbleView extends View {
+class BadgeView extends View {
     
     private ResHelper resHelper;
     
@@ -42,23 +40,23 @@ public class BubbleView extends View {
     
     private enum VIEW_EFFECT {ADD, UPDATE, REMOVE}
     
-    public BubbleView(Context context) {
+    public BadgeView(Context context) {
         super(context);
         init(context, null);
     }
     
-    public BubbleView(Context context, @Nullable AttributeSet attrs) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }
     
-    public BubbleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
     
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public BubbleView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public BadgeView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }
@@ -69,7 +67,7 @@ public class BubbleView extends View {
         margin2x = getResources().getDimensionPixelSize(R.dimen.margin_2x);
         int colorSelected = Color.RED;
 //        int colorSelected = ContextCompat.getColor(context, R.color.selected_theme_color);
-        resHelper = new ResHelper(colorSelected, colorSelected, 0, 0, false);
+        resHelper = new ResHelper(colorSelected, colorSelected, 0, 0, 0);
         
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(40);
@@ -147,7 +145,7 @@ public class BubbleView extends View {
             }
             resHelper.setRoundRadius(radiusX);
             rectF.set(viewX - radiusX, viewY + radiusY, viewX + radiusX, viewY - radiusY);
-            circlePath.addRoundRect(rectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.ALL), Path.Direction.CCW);
+            circlePath.addRoundRect(rectF, resHelper.getCornerRadii(ResHelper.CORNER_POSITION.ALL, 1.0F), Path.Direction.CCW);
         }
         resHelper.drawPath(canvas, circlePath);
     

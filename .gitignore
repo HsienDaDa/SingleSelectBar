@@ -65,3 +65,8 @@ freeline_project_description.json
 #gradlew
 #gradlew.bat
 #settings.gradle
+
+# mac ds store file
+.DS_Store
+app/.DS_Store
+ui/.DS_Store
