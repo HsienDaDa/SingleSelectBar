@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -16,7 +15,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.Dimension;
 import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 import com.supermumu.ui.graphics.drawable.RoundCornerShape;
@@ -27,8 +25,8 @@ import java.util.Arrays;
  * Created by hsienhsu on 2017/10/5.
  */
 class ResHelper {
-    private static final int RIPPLE_ALPHA_VALUE = 77;
-    private static final int PRESSED_ALPHA_VALUE = 51;
+    private static final int RIPPLE_ALPHA_VALUE = 55;   // 20%
+    private static final int PRESSED_ALPHA_VALUE = 25;  // 10%
     
     private Paint selectedColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private @ColorInt int colorSelected;
@@ -191,7 +189,7 @@ class ResHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             backgroundDrawable = getRippleEffect(cornerPosition, color);
         } else {
-            backgroundDrawable = getPressedEffectBeforeLollipop(color);
+            backgroundDrawable = getPressedEffectBeforeLollipop(cornerPosition, color);
         }
         return backgroundDrawable;
     }
@@ -203,27 +201,37 @@ class ResHelper {
         states[0] = new int[] {android.R.attr.state_enabled, android.R.attr.state_pressed};
         ColorStateList colorStateList = new ColorStateList(states, colors);
     
-        Drawable maskDrawable;
-        if (CORNER_POSITION.CENTER == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new RoundCornerShape(centerCornerRadii));
-        } else if (CORNER_POSITION.START == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new RoundCornerShape(startCornerRadii));
-        } else if (CORNER_POSITION.END == cornerPosition) {
-            maskDrawable = new ShapeDrawable(new RoundCornerShape(endCornerRadii));
-        } else {
-            maskDrawable = new ShapeDrawable(new RoundCornerShape(fullCornerRadii));
-        }
+        Drawable maskDrawable = getCornerStateDrawable(cornerPosition);
         maskDrawable.setAlpha(RIPPLE_ALPHA_VALUE);
+        maskDrawable.mutate();
     
         return new RippleDrawable(colorStateList, null, maskDrawable);
     }
     
-    private Drawable getPressedEffectBeforeLollipop(int color) {
-        ColorDrawable colorDrawablePressed = new ColorDrawable(color);
-        colorDrawablePressed.setAlpha(PRESSED_ALPHA_VALUE);
+    private Drawable getPressedEffectBeforeLollipop(CORNER_POSITION cornerPosition, int color) {
+        ShapeDrawable colorDrawablePressed = getCornerStateDrawable(cornerPosition);
+        colorDrawablePressed.getPaint().setColor(color);
+        colorDrawablePressed.getPaint().setStyle(Paint.Style.FILL);
+        colorDrawablePressed.getPaint().setAlpha(PRESSED_ALPHA_VALUE);
+        colorDrawablePressed.mutate();
+    
         StateListDrawable textBgDrawable = new StateListDrawable();
         textBgDrawable.addState(new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed}, colorDrawablePressed);
         return textBgDrawable;
+    }
+    
+    private ShapeDrawable getCornerStateDrawable(CORNER_POSITION cornerPosition) {
+        ShapeDrawable stateDrawable;
+        if (CORNER_POSITION.CENTER == cornerPosition) {
+            stateDrawable = new ShapeDrawable(new RoundCornerShape(centerCornerRadii));
+        } else if (CORNER_POSITION.START == cornerPosition) {
+            stateDrawable = new ShapeDrawable(new RoundCornerShape(startCornerRadii));
+        } else if (CORNER_POSITION.END == cornerPosition) {
+            stateDrawable = new ShapeDrawable(new RoundCornerShape(endCornerRadii));
+        } else {
+            stateDrawable = new ShapeDrawable(new RoundCornerShape(fullCornerRadii));
+        }
+        return stateDrawable;
     }
     
     void drawRect(Canvas canvas, Rect rect) {
