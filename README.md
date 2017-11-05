@@ -7,7 +7,7 @@ SingleSelectBar
 [![Download](https://api.bintray.com/packages/supermumu/maven/ui/images/download.svg)](https://bintray.com/supermumu/maven/ui/_latestVersion)
 [![](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/supermumu/SingleSelectBar/blob/master/LICENSE.txt)
 
-### New release v1.0.5:
+### New release v1.0.6:
 
 <img src="https://user-images.githubusercontent.com/32517342/32175182-176c87f2-bdbf-11e7-86db-b506610bca3e.gif" width="30%" />
 
