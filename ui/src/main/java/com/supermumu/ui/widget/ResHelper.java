@@ -75,7 +75,12 @@ class ResHelper {
         setStartRoundRadius(startCornerRadii, roundRadius);
         
         // end
-        setEndRoundRadius(endCornerRadii, roundRadius);
+        try {
+            setEndRoundRadius(endCornerRadii, roundRadius);
+        } catch (NullPointerException e) {
+            // unknown exception, catch it!!!
+            e.printStackTrace();
+        }
     }
     
     private void setStartRoundRadius(float[] cornetRadii, float roundRadius) {
