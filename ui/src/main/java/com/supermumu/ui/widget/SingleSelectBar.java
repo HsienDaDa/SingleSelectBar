@@ -200,14 +200,14 @@ public class SingleSelectBar extends LinearLayout {
     }
     
     private void setTabOrientation(int orientation) {
-        super.setOrientation(orientation);
-        
-        if (orientation == LinearLayout.HORIZONTAL) {
-            setGravity(Gravity.CENTER_VERTICAL);
-        } else {
-            setGravity(Gravity.CENTER_HORIZONTAL);
-        }
-        resHelper.setOrientation(orientation);
+//        super.setOrientation(orientation);
+//
+//        if (orientation == LinearLayout.HORIZONTAL) {
+//            setGravity(Gravity.CENTER_VERTICAL);
+//        } else {
+//            setGravity(Gravity.CENTER_HORIZONTAL);
+//        }
+//        resHelper.setOrientation(orientation);
     }
     
     @Override

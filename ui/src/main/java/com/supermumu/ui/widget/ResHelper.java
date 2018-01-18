@@ -53,6 +53,7 @@ class ResHelper {
         setColorUnselected(colorUnselected);
         this.roundRadius = roundRadius;
         this.strokeWidth = strokeWidth;
+        this.orientation = LinearLayout.HORIZONTAL;
     
         setColorPressed(colorPressed);
         setRoundRadius(roundRadius);
@@ -60,8 +61,8 @@ class ResHelper {
     }
     
     void setOrientation(int orientation) {
-        this.orientation = orientation;
-        setRoundRadius(roundRadius);
+//        this.orientation = orientation;
+//        setRoundRadius(roundRadius);
     }
     
     void setRoundRadius(float roundRadius) {
