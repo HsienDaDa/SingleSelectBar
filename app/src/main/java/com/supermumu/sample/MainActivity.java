@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.supermumu.ui.widget.SingleSelectBar;
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
+                Toast.makeText(MainActivity.this, "view id: "+view.getId(), Toast.LENGTH_SHORT).show();
                 result1.setText(list.get(position));
             }
         });
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
+                Toast.makeText(MainActivity.this, "view id: "+view.getId(), Toast.LENGTH_SHORT).show();
                 result2.setText(list.get(position));
             }
         });
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
+                Toast.makeText(MainActivity.this, "view id: "+view.getId(), Toast.LENGTH_SHORT).show();
                 result3.setText(list.get(position));
             }
         });
@@ -80,10 +84,15 @@ public class MainActivity extends AppCompatActivity {
         selectBar.setOnTabSelectListener(new SingleSelectBar.OnTabSelectListener() {
             @Override
             public void onSelect(int position, View view) {
+                Toast.makeText(MainActivity.this, "view id: "+view.getId(), Toast.LENGTH_SHORT).show();
                 result4.setText(list.get(position));
             }
         });
         selectBar.setTabs(list.subList(0, 5), 2);
+        
+        for (int i=0; i<5; i++) {
+            selectBar.setTabId(i, i+1);
+        }
     
 //        BubbleView bubbleView = findViewById(R.id.bubble_view1);
 //        bubbleView.setBubbleCount(1);

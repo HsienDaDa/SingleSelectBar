@@ -370,6 +370,10 @@ public class SingleSelectBar extends LinearLayout {
         resHelper.drawPath(canvas, selectedPath);
     }
     
+    public void setTabId(@IntRange(from=0, to=4) int position, int id) {
+        tabs[position].setId(id);
+    }
+    
     /**
      * Set a new list of text to tabs. The texts display give title.
      *
@@ -752,6 +756,10 @@ public class SingleSelectBar extends LinearLayout {
     
         public void setCornerPosition(ResHelper.CORNER_POSITION cornerPosition) {
             this.cornerPosition = cornerPosition;
+        }
+        
+        public void setId(int id) {
+            view.setId(id);
         }
     
         private void updateView() {
